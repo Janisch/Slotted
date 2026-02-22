@@ -44,14 +44,15 @@ main {
   width: 100%;
   box-sizing: border-box;
   padding: 2rem;
-
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: flex-start;
-  gap: 5rem;
+  gap: 3rem;
 }
 
 .calendar {
+  width: 70%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -61,7 +62,7 @@ main {
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
-.calendar > h2 {
+.calendar>h2 {
   margin: 0 0 1rem;
   font-weight: 300;
   font-size: 2rem;
@@ -78,6 +79,8 @@ main {
   justify-content: center;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+
 }
 
 .slots {
@@ -96,7 +99,7 @@ main {
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
-.day > h4 {
+.day>h4 {
   margin: 0 0 1rem;
   text-transform: uppercase;
 }
@@ -197,7 +200,7 @@ main {
   align-items: center;
 }
 
-.selectTimeFrame > form {
+.selectTimeFrame>form {
   background-color: var(--color-bg-surface);
   padding: 2rem 3rem;
   border-radius: 1rem;
@@ -226,12 +229,13 @@ main {
 }
 
 .eventControlContainer {
+  width: 20%;
   background-color: var(--color-bg-surface);
   padding: 1rem;
   border-radius: 1rem;
 }
 
-.eventControlContainer > h2 {
+.eventControlContainer>h2 {
   margin: 0;
   padding: 1rem;
   border-radius: 1rem;
@@ -258,7 +262,7 @@ main {
   margin-left: 0.1rem;
 }
 
-.eventListElement > button {
+.eventListElement>button {
   margin-block: 0.2rem;
   padding: 4px 16px;
   border-radius: 8px;
@@ -267,10 +271,34 @@ main {
   background-color: #00a2ff6b;
 }
 
-.eventListElement > button.deleteEvent {
+.eventListElement>button.deleteEvent {
   background-color: rgba(255, 0, 0, 0.514);
 }
 
-.eventListElement > button:hover {
+.eventListElement>button:hover {
   background-color: #ff9a00;
+}
+
+@media (max-width: 1250px) {
+  main {
+    gap: 1rem;
+  }
+
+  .calendar {
+    width: 100%;
+  }
+
+  .dates {
+    width: 100%;
+  }
+
+  .day {
+    width: 100%;
+    height: 100vH;
+  }
+
+  .eventControlContainer {
+    width: 100%;
+    height: 10%
+  }
 }
