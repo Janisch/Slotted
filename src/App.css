@@ -1,0 +1,276 @@
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --slot-height: 16px;
+
+  --color-bg-app: #bfc9d1;
+  --color-bg-surface: #eaefef;
+  --color-bg-surface-hover: #ff9a00;
+  --color-border-subtle: rgb(55, 56, 114);
+  --color-border-accent: rgba(120, 160, 255, 0.45);
+
+  --color-text-primary: #ff9a00;
+  --color-text-muted: rgb(201, 203, 211);
+  --color-text-secondary: rgb(134, 135, 138);
+
+  --color-accent: rgba(120, 160, 255, 0.5);
+  --color-accent-light: rgba(120, 160, 255, 0.25);
+  --color-accent-strong: rgba(68, 111, 175, 1);
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
+  font-family: 'Satoshi';
+}
+
+main {
+  height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 2rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 5rem;
+}
+
+.calendar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--color-bg-surface);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
+}
+
+.calendar > h2 {
+  margin: 0 0 1rem;
+  font-weight: 300;
+  font-size: 2rem;
+}
+
+.dates,
+.slots,
+.dateForm,
+.selectTimeFrame {
+  display: flex;
+}
+
+.dates {
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.slots {
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  padding-bottom: 1rem;
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
+}
+
+.day > h4 {
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+}
+
+.slot {
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  width: 10rem;
+  height: var(--slot-height);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-surface);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.slot.isFullHour {
+  color: var(--color-text-secondary);
+}
+
+.slot:hover {
+  color: black;
+  font-weight: 900;
+  background-color: var(--color-bg-surface-hover);
+}
+
+.slot.isSelected {
+  background-color: #ff9900bd;
+  font-weight: 300;
+  border-radius: 0;
+  color: rgba(29, 29, 51, 0.438);
+}
+
+.slot.isSelected:not(.isSelected + .isSelected),
+.slot.isSelected:not(:has(+ .isSelected)) {
+  background-color: #ff5d00;
+  font-weight: 700;
+  color: black;
+}
+
+.slot.isSelected:not(.isSelected + .isSelected) {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.slot.isSelected:not(:has(+ .isSelected)) {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.slot.isOccupied:hover {
+  background-color: rgba(255, 0, 0, 0.445);
+  cursor: not-allowed;
+}
+
+.isOccupied {
+  opacity: 0.25;
+}
+
+.event {
+  position: absolute;
+  left: 20%;
+  width: 1rem;
+  padding: 4px;
+  font-size: 1rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: #00a2ff6b;
+  border: 1px solid var(--color-border-accent);
+  transition:
+    background-color 0.1s ease-in,
+    width 0.15s,
+    color 0.1s;
+}
+
+.event.currentSelection {
+  width: 60%;
+  background-color: #ff9a00;
+  color: black;
+}
+
+.addEvent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  padding: 2rem;
+  border-radius: 1rem;
+  background-color: var(--color-bg-app);
+  z-index: 5;
+}
+
+.selectTimeFrame {
+  flex-direction: column;
+  align-items: center;
+}
+
+.selectTimeFrame > form {
+  background-color: var(--color-bg-surface);
+  padding: 2rem 3rem;
+  border-radius: 1rem;
+}
+
+.dateForm {
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.highlight {
+  padding: 5px 10px;
+  font-weight: 700;
+  border-radius: 5px;
+  color: #ff9a00;
+  background-color: white;
+}
+
+.eventList {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1rem 2rem;
+  border-radius: 16px;
+}
+
+.eventControlContainer {
+  background-color: var(--color-bg-surface);
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.eventControlContainer > h2 {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 1rem;
+  background-color: #ff9a00;
+  color: #eaefef;
+}
+
+.eventListElement {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.eventListElementContent {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eventListElementContent span {
+  white-space: nowrap;
+  margin-left: 0.1rem;
+}
+
+.eventListElement > button {
+  margin-block: 0.2rem;
+  padding: 4px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: #00a2ff6b;
+}
+
+.eventListElement > button.deleteEvent {
+  background-color: rgba(255, 0, 0, 0.514);
+}
+
+.eventListElement > button:hover {
+  background-color: #ff9a00;
+}
