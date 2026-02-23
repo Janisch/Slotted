@@ -1,4 +1,4 @@
-import { getDateString, formatDate, isSameDay, minutesToTimeString } from '../timeUtils';
+import { getDateString, formatDate, isSameDay, minutesToTimeString, isInTimeFrame } from '../timeUtils';
 import React from 'react';
 
 export default function EventList(props) {
@@ -15,18 +15,20 @@ export default function EventList(props) {
       const isNewDate = lastDate === null || !isSameDay(lastDate, event.date);
       lastDate = event.date;
 
-      const rowKey = `${formatDate(event.date)}-${event.start}-${event.end}-${event.title}`;
+      const eventKey = `${formatDate(event.date)}-${event.start}-${event.end}-${event.title}`;
+      const inFrame = isInTimeFrame(event.date, props.timeFrame.start, props.timeFrame.end);
+
+      if (!inFrame) return null;
 
       return (
-        <React.Fragment key={rowKey}>
+        <React.Fragment key={eventKey}>
           {isNewDate ?
             <h4>{getDateString(event.date)}</h4>
           : null}
+
           <div
             className="eventListElement"
-            onPointerEnter={() => {
-              props.onEventHoverStart(event);
-            }}
+            onPointerEnter={() => props.onEventHoverStart(event)}
             onPointerLeave={props.onEventHoverExit}>
             <button className="eventListElementContent">
               <span>

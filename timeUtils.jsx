@@ -13,6 +13,12 @@ export function getDates(startDate, endDate) {
   return dates;
 }
 
+export function isInTimeFrame(date, startDate, endDate) {
+  const result = startDate.getTime() <= date.getTime() && date.getTime() <= endDate.getTime();
+
+  return result;
+}
+
 export function roundTime(minutes, slotInterval = 30) {}
 
 export function timeToMinutes(timeString) {
@@ -36,7 +42,6 @@ export function isSameDay(a, b) {
 }
 
 export function formatDate(date) {
-  console.log(date);
   if (date instanceof Date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');

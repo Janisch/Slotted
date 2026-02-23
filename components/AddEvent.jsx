@@ -26,7 +26,6 @@ export default function AddEvent(props) {
   function updateSelectedSlotsOnChange(e) {
     const { name, value } = e.target;
     const time = name === 'date' ? formatDate(value) : timeToMinutes(value);
-    console.log(name, time);
     props.setSelectedSlots((prevSelectedSlots) => {
       if (name === 'date') {
         return {
@@ -44,8 +43,6 @@ export default function AddEvent(props) {
       return { ...prevSelectedSlots, [name]: { ...prevSelectedSlots[name], minutes: time } };
     });
   }
-
-  console.log(props.selectedSlots);
 
   return (
     <form className="addEvent" onSubmit={addEvent} onChange={updateSelectedSlotsOnChange}>

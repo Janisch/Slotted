@@ -26,8 +26,6 @@ function App() {
     });
   }
 
-  console.log(timeFrame.start);
-
   return (
     <>
       <main>
@@ -35,9 +33,15 @@ function App() {
           <SelectTimeFrame timeFrame={timeFrame} setTimeFrame={setTimeFrame} />
         : <>
             <section className="eventControlContainer">
-              <DateSelection startDate={timeFrame.start} endDate={timeFrame.end} />
+              <DateSelection
+                startDate={timeFrame.start}
+                endDate={timeFrame.end}
+                timeFrame={timeFrame}
+                setTimeFrame={setTimeFrame}
+              />
               {events.length > 0 ?
                 <EventList
+                  timeFrame={timeFrame}
                   events={events}
                   setEvents={setEvents}
                   setSelectedEvent={setSelectedEvent}
