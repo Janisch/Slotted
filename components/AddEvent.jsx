@@ -7,10 +7,10 @@ export default function AddEvent(props) {
   function addEvent(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const eventDate = formData.getAll('eventDateInput')[0];
-    const eventStart = formData.getAll('eventStartInput')[0];
-    const eventEnd = formData.getAll('eventEndInput')[0];
-    const eventTitle = formData.getAll('titleInput')[0];
+    const eventDate = formData.get('date');
+    const eventStart = formData.get('startSlot');
+    const eventEnd = formData.get('endSlot');
+    const eventTitle = formData.get('titleInput');
     const newEvent = {
       title: eventTitle,
       date: formatDate(eventDate),
@@ -23,36 +23,60 @@ export default function AddEvent(props) {
     props.setShowEvent(false);
   }
 
+  function updateSelectedSlotsOnChange(e) {
+    const { name, value } = e.target;
+    const time = name === 'date' ? formatDate(value) : timeToMinutes(value);
+    console.log(name, time);
+    props.setSelectedSlots((prevSelectedSlots) => {
+      if (name === 'date') {
+        return {
+          ...prevSelectedSlots,
+          startSlot: {
+            ...prevSelectedSlots.startSlot,
+            date: time,
+          },
+          endSlot: {
+            ...prevSelectedSlots.endSlot,
+            date: time,
+          },
+        };
+      }
+      return { ...prevSelectedSlots, [name]: { ...prevSelectedSlots[name], minutes: time } };
+    });
+  }
+
+  console.log(props.selectedSlots);
+
   return (
-    <form className="addEvent" onSubmit={addEvent}>
+    <form className="addEvent" onSubmit={addEvent} onChange={updateSelectedSlotsOnChange}>
       <label htmlFor="titleInput">Titel</label>
       <input type="text" placeholder={randomPlaceholder} autoFocus name="titleInput" id="titleInput" required />
-      <label htmlFor="eventDateInput">Datum</label>
+      <label htmlFor="date">Datum</label>
       <input
         type="date"
         required
         defaultValue={formatDate(props.day)}
         min={formatDate(props.startDate)}
         max={formatDate(props.endDate)}
-        name="eventDateInput"
-        id="eventDateInput"
+        name="date"
+        id="date"
       />
-      <label htmlFor="eventStartInput">Beginn</label>
+      <label htmlFor="startSlot">Beginn</label>
       <input
         required
         type="time"
-        name="eventStartInput"
+        name="startSlot"
         defaultValue={minutesToTimeString(props.start)}
         step={900}
-        id="eventStartInput"></input>
-      <label htmlFor="eventEndInput">Ende</label>
+        id="startSlot"></input>
+      <label htmlFor="endSlot">Ende</label>
       <input
         required
         type="time"
-        name="eventEndInput"
+        name="endSlot"
         defaultValue={minutesToTimeString(props.end)}
         step={900}
-        id="eventEndInput"></input>
+        id="endSlot"></input>
       <button type="submit">Hinzufügen</button>
     </form>
   );

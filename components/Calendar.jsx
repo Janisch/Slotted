@@ -204,6 +204,7 @@ export default function Calendar(props) {
             <AddEvent
               showEvent={showEvent}
               setShowEvent={setShowEvent}
+              selectedSlots={selectedSlots}
               setSelectedSlots={setSelectedSlots}
               startDate={props.startDate}
               endDate={props.endDate}
