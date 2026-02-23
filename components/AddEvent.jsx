@@ -18,7 +18,15 @@ export default function AddEvent(props) {
       end: timeToMinutes(eventEnd),
     };
     props.setEvents((prevEvents) => {
-      return [...prevEvents, newEvent].sort((a, b) => a.date - b.date);
+      return [...prevEvents, newEvent].sort((a, b) => {
+        const dateDiff = a.date - b.date;
+        if (dateDiff !== 0) return dateDiff;
+
+        const startDiff = a.start - b.start;
+        if (startDiff !== 0) return startDiff;
+
+        return a.end - b.end;
+      });
     });
     props.setShowEvent(false);
   }

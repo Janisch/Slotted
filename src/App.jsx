@@ -15,10 +15,15 @@ function App() {
   const [selectedEvent, setSelectedEvent] = React.useState(null);
 
   //const [timeFrame, setTimeFrame] = React.useState({ start: null, end: null });
-  const [timeFrame, setTimeFrame] = React.useState({ start: new Date(2026, 1, 16), end: new Date(2026, 1, 22) });
+  const [timeFrame, setTimeFrame] = React.useState({
+    startDate: new Date(2026, 1, 16),
+    endDate: new Date(2026, 1, 22),
+    startMinutes: 360,
+    endMinutes: 1020,
+  });
 
   //Derived Variables
-  const timeFrameIsEmpty = !Boolean(timeFrame.start && timeFrame.end);
+  const timeFrameIsEmpty = !Boolean(timeFrame.startDate && timeFrame.endDate);
 
   function handleEventHover(event) {
     setSelectedEvent((prevSelectedEvent) => {
@@ -34,8 +39,8 @@ function App() {
         : <>
             <section className="eventControlContainer">
               <DateSelection
-                startDate={timeFrame.start}
-                endDate={timeFrame.end}
+                startDate={timeFrame.startDate}
+                endDate={timeFrame.endDate}
                 timeFrame={timeFrame}
                 setTimeFrame={setTimeFrame}
               />
@@ -52,8 +57,10 @@ function App() {
               : null}
             </section>
             <Calendar
-              startDate={timeFrame.start}
-              endDate={timeFrame.end}
+              startMinutes={timeFrame.startMinutes}
+              endMinutes={timeFrame.endMinutes}
+              startDate={timeFrame.startDate}
+              endDate={timeFrame.endDate}
               events={events}
               setEvents={setEvents}
               selectedEvent={selectedEvent}

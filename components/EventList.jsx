@@ -1,4 +1,4 @@
-import { getDateString, formatDate, isSameDay, minutesToTimeString, isInTimeFrame } from '../timeUtils';
+import { getDateString, formatDate, isSameDay, minutesToTimeString, dateIsInTimeFrame } from '../timeUtils';
 import React from 'react';
 
 export default function EventList(props) {
@@ -16,7 +16,7 @@ export default function EventList(props) {
       lastDate = event.date;
 
       const eventKey = `${formatDate(event.date)}-${event.start}-${event.end}-${event.title}`;
-      const inFrame = isInTimeFrame(event.date, props.timeFrame.start, props.timeFrame.end);
+      const inFrame = dateIsInTimeFrame(event.date, props.timeFrame.startDate, props.timeFrame.endDate);
 
       if (!inFrame) return null;
 

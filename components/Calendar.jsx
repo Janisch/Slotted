@@ -1,6 +1,14 @@
 import clsx from 'clsx';
 import React from 'react';
-import { getDates, minutesToTimeString, isSameDay, MONTHS, DAYS, SLOT_HEIGHT } from '../timeUtils';
+import {
+  getDates,
+  minutesToTimeString,
+  isSameDay,
+  MONTHS,
+  DAYS,
+  SLOT_HEIGHT,
+  minutesAreInTimeFrame,
+} from '../timeUtils';
 import AddEvent from '../components/AddEvent';
 import {
   useFloating,
@@ -16,7 +24,7 @@ import { motion } from 'motion/react';
 
 export default function Calendar(props) {
   //Statics
-  const SLOT_INTERVAL = 30;
+  const SLOT_INTERVAL = 15;
   const SLOTS_PER_DAY = (24 * 60) / SLOT_INTERVAL;
 
   //State
@@ -72,7 +80,10 @@ export default function Calendar(props) {
   //functions
   function checkIfSlotIsOccupied(date, minutesFromStart) {
     return props.events.some(
-      (e) => isSameDay(e.date, date) && e.start <= minutesFromStart && minutesFromStart <= e.end,
+      (e) =>
+        isSameDay(e.date, date) &&
+        e.start + SLOT_INTERVAL <= minutesFromStart &&
+        minutesFromStart <= e.end - SLOT_INTERVAL,
     );
   }
 
@@ -87,10 +98,16 @@ export default function Calendar(props) {
 
   function createTimeSlots(date) {
     const slots = Array.from({ length: SLOTS_PER_DAY }, (_, i) => i);
+
     return slots.map((slotIndex) => {
       const minutesFromStart = slotIndex * SLOT_INTERVAL;
       const hour = Math.floor(minutesFromStart / 60);
       const minutes = minutesFromStart % 60;
+
+      if (minutesFromStart < props.startMinutes || minutesFromStart > props.endMinutes) {
+        return null;
+      }
+
       return (
         <div
           className={clsx('slot', {
@@ -100,12 +117,8 @@ export default function Calendar(props) {
           })}
           key={`${date.toISOString()}-${minutesFromStart}`}
           role="gridcell"
-          onPointerDown={(e) => {
-            handleDragStart(e, date, minutesFromStart);
-          }}
-          onPointerEnter={(e) => {
-            handleDragMove(e, date, minutesFromStart);
-          }}>
+          onPointerDown={(e) => handleDragStart(e, date, minutesFromStart)}
+          onPointerEnter={(e) => handleDragMove(e, date, minutesFromStart)}>
           {`${hour}:${String(minutes).padStart(2, '0')}`}
         </div>
       );
@@ -114,7 +127,9 @@ export default function Calendar(props) {
 
   function createEventsBlocks(date) {
     return props.events
-      .filter((e) => isSameDay(date, e.date))
+      .filter(
+        (e) => isSameDay(date, e.date) && minutesAreInTimeFrame(e.start, e.end, props.startMinutes, props.endMinutes),
+      )
       .map((e) => (
         <button
           onPointerEnter={() => {
@@ -122,8 +137,8 @@ export default function Calendar(props) {
           }}
           onPointerLeave={props.onEventHoverExit}
           style={{
-            top: (e.start / SLOT_INTERVAL) * SLOT_HEIGHT,
-            height: (e.end / SLOT_INTERVAL - e.start / SLOT_INTERVAL) * SLOT_HEIGHT + SLOT_HEIGHT,
+            top: (e.start / SLOT_INTERVAL) * SLOT_HEIGHT - (props.startMinutes / SLOT_INTERVAL) * SLOT_HEIGHT,
+            height: (e.end / SLOT_INTERVAL - e.start / SLOT_INTERVAL) * SLOT_HEIGHT,
           }}
           key={`${e.title}-${e.start}-${e.end}`}
           className={clsx('event', { currentSelection: props.selectedEvent === e })}>

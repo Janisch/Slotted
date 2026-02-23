@@ -13,10 +13,16 @@ export function getDates(startDate, endDate) {
   return dates;
 }
 
-export function isInTimeFrame(date, startDate, endDate) {
+export function dateIsInTimeFrame(date, startDate, endDate) {
   const result = startDate.getTime() <= date.getTime() && date.getTime() <= endDate.getTime();
 
   return result;
+}
+
+export function minutesAreInTimeFrame(minutesStart, minutesEnd, rangeStart, rangeEnd) {
+  const isInRange =
+    minutesStart >= rangeStart && minutesStart <= rangeEnd && minutesEnd >= rangeStart && minutesEnd <= rangeEnd;
+  return isInRange;
 }
 
 export function roundTime(minutes, slotInterval = 30) {}

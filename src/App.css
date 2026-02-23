@@ -57,8 +57,7 @@ body {
 }
 
 main {
-  height: 100vh;
-  width: 100%;
+  height: 100dvh;
   box-sizing: border-box;
   padding: 2rem;
   display: flex;
@@ -69,6 +68,9 @@ main {
 }
 
 .calendar {
+  box-sizing: border-box;
+  max-height: calc(100dvh - 4rem);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -188,7 +190,7 @@ main {
   align-items: center;
   justify-content: center;
   position: absolute;
-  width: 100%;
+  width: 75%;
   font-size: auto;
   overflow: hidden;
   border-radius: 0.5rem;
@@ -314,9 +316,6 @@ main {
   background-color: #eaefef;
 }
 
-input::-webkit-calendar-picker-indicator {
-}
-
 .eventListElement {
   display: flex;
   justify-content: space-between;
@@ -364,7 +363,7 @@ input::-webkit-calendar-picker-indicator {
   border-radius: 0.5rem;
   padding: 0.25rem;
   color: #ff9a00;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   margin-bottom: 0;
 }
 

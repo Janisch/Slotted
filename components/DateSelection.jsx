@@ -11,9 +11,9 @@ export default function DateSelection(props) {
 
   return (
     <h2>
-      <input type="date" name="start" value={formatDate(props.startDate)} onChange={updateState} />
+      <input type="date" name="startDate" value={formatDate(props.startDate)} onChange={updateState} />
       {' - '}
-      <input type="date" name="end" value={formatDate(props.endDate)} onChange={updateState} />
+      <input type="date" name="endDate" value={formatDate(props.endDate)} onChange={updateState} />
     </h2>
   );
 }

@@ -43,9 +43,19 @@ export default function SelectTimeFrame(props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 2.8, ease: 'easeOut' }}>
         <label htmlFor="timeFrameStart">Von</label>
-        <input type="date" max={props.timeFrame.end ? formatDate(props.timeFrame.end) : ''} name="start" id="start" />
+        <input
+          type="date"
+          max={props.timeFrame.endDate ? formatDate(props.timeFrame.endDate) : ''}
+          name="start"
+          id="start"
+        />
         <label htmlFor="timeFrameStart">Bis</label>
-        <input type="date" min={props.timeFrame.start ? formatDate(props.timeFrame.start) : ''} name="end" id="end" />
+        <input
+          type="date"
+          min={props.timeFrame.startDate ? formatDate(props.timeFrame.startDate) : ''}
+          name="end"
+          id="end"
+        />
       </motion.form>
     </motion.div>
   );
