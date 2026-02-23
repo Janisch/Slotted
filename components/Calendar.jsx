@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import React from 'react';
-import { getDates, getDateString, isSameDay, MONTHS, DAYS, SLOT_HEIGHT, formatDate } from '../timeUtils';
+import { getDates, minutesToTimeString, isSameDay, MONTHS, DAYS, SLOT_HEIGHT } from '../timeUtils';
 import AddEvent from '../components/AddEvent';
 import {
   useFloating,
@@ -122,12 +122,12 @@ export default function Calendar(props) {
           }}
           onPointerLeave={props.onEventHoverExit}
           style={{
-            top: (e.start / SLOT_INTERVAL) * SLOT_HEIGHT + SLOT_HEIGHT / 5,
-            height: (e.end / SLOT_INTERVAL - e.start / SLOT_INTERVAL) * SLOT_HEIGHT + SLOT_HEIGHT / 2,
+            top: (e.start / SLOT_INTERVAL) * SLOT_HEIGHT,
+            height: (e.end / SLOT_INTERVAL - e.start / SLOT_INTERVAL) * SLOT_HEIGHT + SLOT_HEIGHT,
           }}
           key={`${e.title}-${e.start}-${e.end}`}
           className={clsx('event', { currentSelection: props.selectedEvent === e })}>
-          {e.title}
+          <span className="eventTitle">{e.title}</span>
         </button>
       ));
   }

@@ -23,7 +23,7 @@ export default function EventList(props) {
       return (
         <React.Fragment key={eventKey}>
           {isNewDate ?
-            <h4>{getDateString(event.date)}</h4>
+            <h4 className="eventListDayHeader">{getDateString(event.date)}</h4>
           : null}
 
           <div
