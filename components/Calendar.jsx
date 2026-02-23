@@ -54,7 +54,7 @@ export default function Calendar(props) {
       }
     },
     placement: 'right-start',
-    middleware: [flip(), shift()],
+    middleware: [flip(), shift(), offset(10)],
   });
 
   useDismiss(context);

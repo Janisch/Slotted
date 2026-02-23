@@ -53,7 +53,7 @@ export default function AddEvent(props) {
         defaultValue={minutesToTimeString(props.end)}
         step={900}
         id="eventEndInput"></input>
-      <button type="submit">Submit</button>
+      <button type="submit">Hinzufügen</button>
     </form>
   );
 }
