@@ -18,6 +18,7 @@ export default function AddEvent(props) {
       end: timeToMinutes(eventEnd),
       id: crypto.randomUUID(),
     };
+    e.target.reset();
     props.setEvents((prevEvents) => {
       return [...prevEvents, newEvent].sort((a, b) => {
         const dateDiff = a.date - b.date;
@@ -64,7 +65,7 @@ export default function AddEvent(props) {
       <input
         type="date"
         required
-        Value={props.day ? formatDate(props.day) : formatDate(props.timeFrame.startDate)}
+        defaultValue={props.day ? formatDate(props.day) : formatDate(props.timeFrame.startDate)}
         min={props.startDate ? formatDate(props.startDate) : ''}
         max={props.endDate ? formatDate(props.endDate) : ''}
         name="date"
@@ -75,11 +76,17 @@ export default function AddEvent(props) {
         required
         type="time"
         name="startSlot"
-        Value={minutesToTimeString(props.start)}
+        defaultValue={minutesToTimeString(props.start)}
         step={900}
         id="startSlot"></input>
       <label htmlFor="endSlot">Ende</label>
-      <input required type="time" name="endSlot" Value={minutesToTimeString(props.end)} step={900} id="endSlot"></input>
+      <input
+        required
+        type="time"
+        name="endSlot"
+        defaultValue={minutesToTimeString(props.end)}
+        step={900}
+        id="endSlot"></input>
       <button type="submit">Hinzufügen</button>
     </form>
   );
