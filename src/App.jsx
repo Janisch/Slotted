@@ -4,6 +4,7 @@ import Calendar from '../components/Calendar';
 import SelectTimeFrame from '../components/SelectTimeFrame';
 import EventList from '../components/EventList';
 import DateSelection from '../components/DateSelection';
+import AddEvent from '../components/AddEvent';
 
 function App() {
   //State
@@ -43,7 +44,8 @@ function App() {
                 endDate={timeFrame.endDate}
                 timeFrame={timeFrame}
                 setTimeFrame={setTimeFrame}
-              />
+              />{' '}
+              <AddEvent setEvents={setEvents} timeFrame={timeFrame} />
               {events.length > 0 ?
                 <EventList
                   timeFrame={timeFrame}

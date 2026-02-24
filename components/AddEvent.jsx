@@ -29,7 +29,7 @@ export default function AddEvent(props) {
         return a.end - b.end;
       });
     });
-    props.setShowEvent(false);
+    props.setShowEvent ? props.setShowEvent(false) : null;
   }
 
   function updateSelectedSlotsOnChange(e) {
@@ -54,16 +54,19 @@ export default function AddEvent(props) {
   }
 
   return (
-    <form className="addEvent" onSubmit={addEvent} onChange={updateSelectedSlotsOnChange}>
+    <form
+      className="addEvent"
+      onSubmit={addEvent}
+      onChange={props.setSelectedSlots ? updateSelectedSlotsOnChange : null}>
       <label htmlFor="titleInput">Titel</label>
       <input type="text" placeholder={randomPlaceholder} autoFocus name="titleInput" id="titleInput" required />
       <label htmlFor="date">Datum</label>
       <input
         type="date"
         required
-        defaultValue={formatDate(props.day)}
-        min={formatDate(props.startDate)}
-        max={formatDate(props.endDate)}
+        Value={props.day ? formatDate(props.day) : formatDate(props.timeFrame.startDate)}
+        min={props.startDate ? formatDate(props.startDate) : ''}
+        max={props.endDate ? formatDate(props.endDate) : ''}
         name="date"
         id="date"
       />
@@ -72,17 +75,11 @@ export default function AddEvent(props) {
         required
         type="time"
         name="startSlot"
-        defaultValue={minutesToTimeString(props.start)}
+        Value={minutesToTimeString(props.start)}
         step={900}
         id="startSlot"></input>
       <label htmlFor="endSlot">Ende</label>
-      <input
-        required
-        type="time"
-        name="endSlot"
-        defaultValue={minutesToTimeString(props.end)}
-        step={900}
-        id="endSlot"></input>
+      <input required type="time" name="endSlot" Value={minutesToTimeString(props.end)} step={900} id="endSlot"></input>
       <button type="submit">Hinzufügen</button>
     </form>
   );

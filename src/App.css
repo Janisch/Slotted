@@ -281,6 +281,8 @@ main {
 }
 
 .eventControlContainer {
+  box-sizing: border-box;
+  overflow-x: hidden;
   width: 25%;
   background-color: var(--color-bg-surface);
   padding: 1rem;
@@ -316,6 +318,28 @@ main {
   background-color: #eaefef;
 }
 
+.eventControlContainer > .addEvent {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 0.5rem;
+  flex-direction: row;
+  border-radius: 8px;
+  position: relative;
+  padding: 1rem 0.5rem;
+  z-index: 0;
+}
+
+.eventControlContainer > .addEvent > * {
+  flex-grow: 1;
+}
+
 .eventListElement {
   display: flex;
   justify-content: space-between;
@@ -343,11 +367,6 @@ main {
 
 .eventListElement > button.deleteEvent {
   background-color: rgba(255, 0, 0, 0.514);
-}
-
-.eventListElement > div:hover {
-  background-color: #ff9a00;
-  color: white;
 }
 
 .dayEvents {
