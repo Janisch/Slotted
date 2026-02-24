@@ -16,6 +16,7 @@ export default function AddEvent(props) {
       date: formatDate(eventDate),
       start: timeToMinutes(eventStart),
       end: timeToMinutes(eventEnd),
+      id: crypto.randomUUID(),
     };
     props.setEvents((prevEvents) => {
       return [...prevEvents, newEvent].sort((a, b) => {

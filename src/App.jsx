@@ -8,8 +8,8 @@ import DateSelection from '../components/DateSelection';
 function App() {
   //State
   const [events, setEvents] = React.useState([
-    { title: 'DnD mit den Boys', date: new Date(2026, 1, 18), start: 0, end: 90 },
-    { title: 'Call of Cthulhu', date: new Date(2026, 1, 19), start: 60, end: 120 },
+    { title: 'DnD mit den Boys', date: new Date(2026, 1, 18), start: 600, end: 690, id: crypto.randomUUID() },
+    { title: 'Call of Cthulhu', date: new Date(2026, 1, 19), start: 720, end: 790, id: crypto.randomUUID() },
   ]);
 
   const [selectedEvent, setSelectedEvent] = React.useState(null);

@@ -1,11 +1,28 @@
-import { getDateString, formatDate, isSameDay, minutesToTimeString, dateIsInTimeFrame } from '../timeUtils';
+import {
+  getDateString,
+  timeToMinutes,
+  formatDate,
+  isSameDay,
+  minutesToTimeString,
+  dateIsInTimeFrame,
+} from '../timeUtils';
 import React from 'react';
 
 export default function EventList(props) {
-  function deleteEvent(index) {
+  function deleteEvent(id) {
     props.setEvents((prevEvents) => {
-      return prevEvents.toSpliced(index, 1);
+      return prevEvents.filter((event) => {
+        return event.id != id;
+      });
     });
+  }
+
+  function updateEventOnChange(e, id) {
+    const { name, value } = e.target;
+    const timeFields = ['start', 'end'];
+    const derivedValue = timeFields.includes(name) ? timeToMinutes(value) : value;
+
+    props.setEvents((prev) => prev.map((ev) => (ev.id === id ? { ...ev, [name]: derivedValue } : ev)));
   }
 
   function createEventElements() {
@@ -14,14 +31,12 @@ export default function EventList(props) {
     return props.events.map((event, index) => {
       const isNewDate = lastDate === null || !isSameDay(lastDate, event.date);
       lastDate = event.date;
-
-      const eventKey = `${formatDate(event.date)}-${event.start}-${event.end}-${event.title}`;
       const inFrame = dateIsInTimeFrame(event.date, props.timeFrame.startDate, props.timeFrame.endDate);
 
       if (!inFrame) return null;
 
       return (
-        <React.Fragment key={eventKey}>
+        <React.Fragment key={event.id}>
           {isNewDate ?
             <h4 className="eventListDayHeader">{getDateString(event.date)}</h4>
           : null}
@@ -30,13 +45,26 @@ export default function EventList(props) {
             className="eventListElement"
             onPointerEnter={() => props.onEventHoverStart(event)}
             onPointerLeave={props.onEventHoverExit}>
-            <button className="eventListElementContent">
+            <div className="eventListElementContent">
               <span>
-                {minutesToTimeString(event.start)} - {minutesToTimeString(event.end)}
+                <input
+                  onChange={(e) => updateEventOnChange(e, event.id)}
+                  type="time"
+                  name="start"
+                  value={minutesToTimeString(event.start)}></input>
+                <input
+                  type="time"
+                  name="end"
+                  onChange={(e) => updateEventOnChange(e, event.id)}
+                  value={minutesToTimeString(event.end)}></input>
               </span>{' '}
-              {event.title}
-            </button>{' '}
-            <button className="deleteEvent" onClick={() => deleteEvent(index)}>
+              <input
+                type="text"
+                name="title"
+                onChange={(e) => updateEventOnChange(e, event.id)}
+                value={event.title}></input>
+            </div>{' '}
+            <button className="deleteEvent" onClick={() => deleteEvent(event.id)}>
               X
             </button>
           </div>

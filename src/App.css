@@ -80,7 +80,7 @@ main {
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
-.calendar>h2 {
+.calendar > h2 {
   margin: 0 0 1rem;
   font-weight: 300;
   font-size: 2rem;
@@ -117,7 +117,7 @@ main {
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
-.day>h3 {
+.day > h3 {
   text-align: center;
   padding: 1rem;
   width: 100%;
@@ -222,16 +222,16 @@ main {
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
-.addEvent>label {
+.addEvent > label {
   margin-top: 0.5rem;
   font-weight: 700;
 }
 
-.addEvent>label:first-of-type {
+.addEvent > label:first-of-type {
   margin-top: 0rem;
 }
 
-.addEvent>button {
+.addEvent > button {
   margin-top: 0.5rem;
   background-color: rgba(51, 187, 228, 0.589);
   color: black;
@@ -240,7 +240,7 @@ main {
   border-radius: 8px;
 }
 
-.addEvent>button:hover {
+.addEvent > button:hover {
   background-color: #ff9a00;
   color: #eaefef;
   font-weight: bold;
@@ -252,7 +252,7 @@ main {
   align-items: center;
 }
 
-.selectTimeFrame>form {
+.selectTimeFrame > form {
   background-color: var(--color-bg-surface);
   padding: 2rem 3rem;
   border-radius: 1rem;
@@ -288,7 +288,7 @@ main {
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
-.eventControlContainer>h2 {
+.eventControlContainer > h2 {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -301,7 +301,7 @@ main {
   color: #eaefef;
 }
 
-.eventControlContainer>h2>input {
+.eventControlContainer > h2 > input {
   text-align: center;
   font-family: 'Satoshi';
   font-weight: bold;
@@ -311,7 +311,7 @@ main {
   color: #eaefef;
 }
 
-.eventControlContainer>h2>input:hover {
+.eventControlContainer > h2 > input:hover {
   color: #ff9a00;
   background-color: #eaefef;
 }
@@ -328,6 +328,12 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-block: 0.2rem;
+  padding: 4px 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #ffffff6b;
+  border: 1px #ff9a00 solid;
 }
 
 .eventListElementContent span {
@@ -335,22 +341,13 @@ main {
   margin-left: 0.1rem;
 }
 
-.eventListElement>button {
-  margin-block: 0.2rem;
-  padding: 4px 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  background-color: #ffffff6b;
-  border: 1px #ff9a00 solid;
-}
-
-.eventListElement>button.deleteEvent {
+.eventListElement > button.deleteEvent {
   background-color: rgba(255, 0, 0, 0.514);
 }
 
-.eventListElement>button:hover {
+.eventListElement > div:hover {
   background-color: #ff9a00;
+  color: white;
 }
 
 .dayEvents {
@@ -395,7 +392,6 @@ main {
   .dates {
     width: 100%;
   }
-
 
   .eventControlContainer {
     width: 100%;
