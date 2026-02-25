@@ -75,14 +75,13 @@ export default function Calendar(props) {
     dragRef.current.pointerId = e.pointerId;
     dragRef.current.startDay = date;
 
-    setSelectedSlots({ startSlot: { date: date, minutes: minutes }, endSlot: null });
+    setSelectedSlots({ startSlot: { date: date, minutes: minutes }, endSlot: { date: date, minutes: minutes } });
   }
 
   function handleDragMove(e, date) {
-    const drag = dragRef.current;
-    if (!drag.isDragging) return;
-    if (e.pointerId !== drag.pointerId) return;
-    if (!isSameDay(date, drag.startDay)) return;
+    if (!dragRef.current.isDragging) return;
+    if (e.pointerId !== dragRef.current.pointerId) return;
+    if (!isSameDay(date, dragRef.current.startDay)) return;
     const minutes = pointerToMinutes(e);
     if (minutes == null) return;
     setSelectedSlots((prev) => ({
@@ -98,8 +97,8 @@ export default function Calendar(props) {
     dragRef.current.pointerId = null;
     const minutes = pointerToMinutes(e);
     setSelectedSlots((prev) => {
-      const didSelect = minutes !== prev.startSlot.minutes;
-      const next = didSelect ? { ...prev, endSlot: { date, minutes } } : prev;
+      const didSelect = minutes !== prev.startSlot.minutes
+      const next = didSelect ? { ...prev, endSlot: { date, minutes } } : { startSlot: null, endSlot: null };
       setShowEvent(didSelect);
       return next;
     });
@@ -231,7 +230,7 @@ export default function Calendar(props) {
               end={selectedSlots.endSlot.minutes}
             />
           </motion.div>
-        : null}
+          : null}
       </motion.div>
     </>
   );
