@@ -7,8 +7,8 @@ export default function AddEvent(props) {
   const [eventForm, setEventForm] = React.useState({
     title: '',
     date: props.day ? props.day : props.timeFrame.startDate,
-    start: props.start,
-    end: props.end,
+    start: props.start ? props.start : '',
+    end: props.end ? props.end : '',
   });
 
   function addEvent(e) {
@@ -38,14 +38,12 @@ export default function AddEvent(props) {
     const nextDate = name === 'date' ? formatDate(value) : null;
     const nextMinutes = name === 'start' || name === 'end' ? timeToMinutes(value) : null;
 
-    // 1) Form updaten
     setEventForm((prev) => {
       if (name === 'date') return { ...prev, date: nextDate };
       if (name === 'start' || name === 'end') return { ...prev, [name]: nextMinutes };
       return { ...prev, [name]: value };
     });
 
-    // 2) Slots updaten
     props.setSelectedSlots((prev) => {
       if (name === 'date') {
         return {
