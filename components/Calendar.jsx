@@ -51,11 +51,7 @@ export default function Calendar(props) {
     strategy: 'fixed',
     placement: 'right-start',
     whileElementsMounted: autoUpdate,
-    middleware: [
-      offset(8),
-      flip(), // spiegelt auf die andere Seite, wenn kein Platz
-      shift({ padding: 8 }), // schiebt in den Viewport
-    ],
+    middleware: [offset(10), flip(), shift({ padding: 8 })],
   });
 
   //functions
@@ -71,12 +67,14 @@ export default function Calendar(props) {
   };
 
   function handleDragStart(e, date) {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const minutes = pointerToMinutes(e);
+    if (checkIfSlotIsOccupied(date, minutes)) return;
     setShowEvent(false);
     dragRef.current.isDragging = true;
     dragRef.current.pointerId = e.pointerId;
     dragRef.current.startDay = date;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    const minutes = pointerToMinutes(e);
+
     setSelectedSlots({ startSlot: { date: date, minutes: minutes }, endSlot: null });
   }
 
