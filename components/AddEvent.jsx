@@ -22,14 +22,13 @@ export default function AddEvent(props) {
       return [...prevEvents, newEvent].sort((a, b) => {
         const dateDiff = a.date - b.date;
         if (dateDiff !== 0) return dateDiff;
-
         const startDiff = a.start - b.start;
         if (startDiff !== 0) return startDiff;
-
         return a.end - b.end;
       });
     });
     props.setShowEvent ? props.setShowEvent(false) : null;
+    props.setSelectedSlots({ startSlot: null, endSlot: null });
   }
 
   function handleChange(e) {
@@ -69,7 +68,7 @@ export default function AddEvent(props) {
   }
 
   return (
-    <form className="addEvent" onSubmit={addEvent}>
+    <form className="addEvent" onSubmit={addEvent} style={props.floatingStyle} ref={props.floatingRef}>
       <label htmlFor="title">Titel</label>
       <input
         type="text"

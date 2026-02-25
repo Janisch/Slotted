@@ -10,7 +10,17 @@ import {
   minutesAreInTimeFrame,
 } from '../timeUtils';
 import AddEvent from '../components/AddEvent';
-import { useFloating, useDismiss, offset, flip, shift, autoUpdate, FloatingPortal } from '@floating-ui/react';
+import {
+  useFloating,
+  useDismiss,
+  offset,
+  flip,
+  shift,
+  autoUpdate,
+  FloatingPortal,
+  computePosition,
+  autoPlacement,
+} from '@floating-ui/react';
 import { motion } from 'motion/react';
 
 export default function Calendar(props) {
@@ -30,42 +40,23 @@ export default function Calendar(props) {
     pointerId: null,
     isDragging: false,
     startDay: null,
-    element: null,
   });
 
   //Derived Variables
   const dates = getDates(props.startDate, props.endDate);
   const showSelectionDiv = showEvent || Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
 
-  //floatUI
-  const { refs, floatingStyles, context } = useFloating({
-    open: showEvent,
-    onOpenChange: (open) => {
-      setShowEvent(open);
-      if (!open) {
-        setSelectedSlots({
-          startSlot: null,
-          endSlot: null,
-        });
-      }
-    },
+  //floating
+  const { refs, floatingStyles } = useFloating({
     strategy: 'fixed',
-    whileElementsMounted: autoUpdate,
     placement: 'right-start',
-    middleware: [offset(10), flip({ padding: 8 }), shift({ padding: 8 })],
+    whileElementsMounted: autoUpdate,
+    middleware: [
+      offset(8),
+      flip(), // spiegelt auf die andere Seite, wenn kein Platz
+      shift({ padding: 8 }), // schiebt in den Viewport
+    ],
   });
-
-  const setSelectionElement = React.useCallback(
-    (node) => {
-      dragRef.current.element = node;
-      if (node) {
-        refs.setReference(node);
-      }
-    },
-    [refs],
-  );
-
-  useDismiss(context);
 
   //functions
 
@@ -138,8 +129,6 @@ export default function Calendar(props) {
 
     return slots.map((slotIndex) => {
       const minutesFromStart = slotIndex * SLOT_INTERVAL;
-      const hour = Math.floor(minutesFromStart / 60);
-      const minutes = minutesFromStart % 60;
 
       if (minutesFromStart < props.startMinutes || minutesFromStart > props.endMinutes) {
         return null;
@@ -204,11 +193,11 @@ export default function Calendar(props) {
 
                 return (
                   <div
+                    ref={refs.setReference}
                     style={{
                       top: ((min - props.startMinutes) / SLOT_INTERVAL) * SLOT_HEIGHT,
                       height: ((max - min) / SLOT_INTERVAL + 1) * SLOT_HEIGHT,
                     }}
-                    ref={setSelectionElement}
                     className="selection"></div>
                 );
               })()}
@@ -227,28 +216,23 @@ export default function Calendar(props) {
         transition={{ duration: 0.3, ease: 'easeOut' }}>
         <div className="dates">{createDateElements()}</div>
         {showEvent && selectedSlots.startSlot && selectedSlots.endSlot ?
-          <FloatingPortal>
-            <motion.div
-              ref={refs.setFloating}
-              style={floatingStyles}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}>
-              <AddEvent
-                showEvent={showEvent}
-                setShowEvent={setShowEvent}
-                selectedSlots={selectedSlots}
-                setSelectedSlots={setSelectedSlots}
-                startDate={props.startDate}
-                endDate={props.endDate}
-                setEvents={props.setEvents}
-                events={props.events}
-                day={selectedSlots.startSlot.date}
-                start={selectedSlots.startSlot.minutes}
-                end={selectedSlots.endSlot.minutes}
-              />
-            </motion.div>
-          </FloatingPortal>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, ease: 'easeOut' }}>
+            <AddEvent
+              floatingRef={refs.setFloating}
+              floatingStyle={floatingStyles}
+              showEvent={showEvent}
+              setShowEvent={setShowEvent}
+              selectedSlots={selectedSlots}
+              setSelectedSlots={setSelectedSlots}
+              startDate={props.startDate}
+              endDate={props.endDate}
+              setEvents={props.setEvents}
+              events={props.events}
+              day={selectedSlots.startSlot.date}
+              start={selectedSlots.startSlot.minutes}
+              end={selectedSlots.endSlot.minutes}
+            />
+          </motion.div>
         : null}
       </motion.div>
     </>

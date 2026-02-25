@@ -208,18 +208,18 @@ main {
 }
 
 .addEvent {
+  width: max-content;
   position: absolute;
   top: 0;
   left: 0;
   display: flex;
   flex-direction: column;
-  width: max-content;
   padding: 1rem 2rem;
   border-radius: 1rem;
   background-color: #eaefef;
   border: 1px #ff9a00 solid;
-  z-index: 5;
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
 }
 
 .addEvent > label {
@@ -333,7 +333,6 @@ main {
   border-radius: 8px;
   position: relative;
   padding: 1rem 0.5rem;
-  z-index: 0;
 }
 
 .eventControlContainer > .addEvent > * {
@@ -393,6 +392,7 @@ main {
   background-color: #ff5e005b;
   position: absolute;
   width: 100%;
+  border-radius: 8px;
 }
 
 @media (max-width: 1800px) {
