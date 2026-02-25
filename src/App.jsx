@@ -31,8 +31,8 @@ function App() {
 
   //const [timeFrame, setTimeFrame] = React.useState({ start: null, end: null, startMinutes: 360, endMinutes: 1020, });
   const [timeFrame, setTimeFrame] = React.useState({
-    startDate: new Date(2026, 1, 16),
-    endDate: new Date(2026, 1, 22),
+    startDate: new Date(2026, 1, 24),
+    endDate: new Date(2026, 2, 2),
     startMinutes: 360,
     endMinutes: 1020,
   });

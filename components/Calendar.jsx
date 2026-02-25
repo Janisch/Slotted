@@ -2,24 +2,15 @@ import clsx from 'clsx';
 import React from 'react';
 import {
   getDates,
-  minutesToTimeString,
   isSameDay,
   MONTHS,
   DAYS,
   SLOT_HEIGHT,
+  minutesToTimeString,
   minutesAreInTimeFrame,
 } from '../timeUtils';
 import AddEvent from '../components/AddEvent';
-import {
-  useFloating,
-  useDismiss,
-  useInteractions,
-  offset,
-  flip,
-  shift,
-  autoUpdate,
-  autoPlacement,
-} from '@floating-ui/react';
+import { useFloating, useDismiss, offset, flip, shift, autoUpdate, FloatingPortal } from '@floating-ui/react';
 import { motion } from 'motion/react';
 
 export default function Calendar(props) {
@@ -28,25 +19,23 @@ export default function Calendar(props) {
   const SLOTS_PER_DAY = (24 * 60) / SLOT_INTERVAL;
 
   //State
+  const [showEvent, setShowEvent] = React.useState(false);
   const [selectedSlots, setSelectedSlots] = React.useState({
-    isSelected: false,
     startSlot: null,
     endSlot: null,
   });
-  const [showEvent, setShowEvent] = React.useState(false);
 
-  React.useEffect(() => {
-    if (!showEvent) {
-      setSelectedSlots({
-        isSelected: false,
-        startSlot: null,
-        endSlot: null,
-      });
-    }
-  }, [showEvent]);
+  //ref
+  const dragRef = React.useRef({
+    pointerId: null,
+    isDragging: false,
+    startDay: null,
+    element: null,
+  });
 
   //Derived Variables
   const dates = getDates(props.startDate, props.endDate);
+  const showSelectionDiv = showEvent || Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
 
   //floatUI
   const { refs, floatingStyles, context } = useFloating({
@@ -55,29 +44,85 @@ export default function Calendar(props) {
       setShowEvent(open);
       if (!open) {
         setSelectedSlots({
-          isSelected: false,
           startSlot: null,
           endSlot: null,
         });
       }
     },
+    strategy: 'fixed',
+    whileElementsMounted: autoUpdate,
     placement: 'right-start',
-    middleware: [flip(), shift(), offset(10)],
+    middleware: [offset(10), flip({ padding: 8 }), shift({ padding: 8 })],
   });
+
+  const setSelectionElement = React.useCallback(
+    (node) => {
+      dragRef.current.element = node;
+      if (node) {
+        refs.setReference(node);
+      }
+    },
+    [refs],
+  );
 
   useDismiss(context);
 
-  function isInSelectedRange(date, minutesFromStart) {
-    if (!selectedSlots.isSelected || !selectedSlots.startSlot || !selectedSlots.endSlot) return false;
-    if (!isSameDay(date, selectedSlots.startSlot.date)) return false;
+  //functions
 
-    const min = Math.min(selectedSlots.startSlot.minutes, selectedSlots.endSlot.minutes);
-    const max = Math.max(selectedSlots.startSlot.minutes, selectedSlots.endSlot.minutes);
+  const pointerToMinutes = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const slotIndex = Math.floor(y / SLOT_HEIGHT);
+    const minutes = props.startMinutes + slotIndex * SLOT_INTERVAL;
+    if (minutes > props.endMinutes) return props.endMinutes;
+    if (minutes < props.startMinutes) return props.startMinutes;
+    return minutes;
+  };
 
-    return minutesFromStart >= min && minutesFromStart <= max;
+  function handleDragStart(e, date) {
+    setShowEvent(false);
+    dragRef.current.isDragging = true;
+    dragRef.current.pointerId = e.pointerId;
+    dragRef.current.startDay = date;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const minutes = pointerToMinutes(e);
+    setSelectedSlots({ startSlot: { date: date, minutes: minutes }, endSlot: null });
   }
 
-  //functions
+  function handleDragMove(e, date) {
+    const drag = dragRef.current;
+    if (!drag.isDragging) return;
+    if (e.pointerId !== drag.pointerId) return;
+    if (!isSameDay(date, drag.startDay)) return;
+    const minutes = pointerToMinutes(e);
+    if (minutes == null) return;
+    setSelectedSlots((prev) => ({
+      ...prev,
+      endSlot: { date, minutes },
+    }));
+  }
+
+  function handleDragEnd(e, date) {
+    if (e.pointerId !== dragRef.current.pointerId) return;
+    dragRef.current.isDragging = false;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    dragRef.current.pointerId = null;
+    const minutes = pointerToMinutes(e);
+    setSelectedSlots((prev) => {
+      const didSelect = minutes !== prev.startSlot.minutes;
+      const next = didSelect ? { ...prev, endSlot: { date, minutes } } : prev;
+      setShowEvent(didSelect);
+      return next;
+    });
+  }
+
+  function handleCancel(e, date) {
+    if (e.pointerId !== dragRef.current.pointerId) return;
+    dragRef.current.isDragging = false;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    dragRef.current.pointerId = null;
+  }
+
   function checkIfSlotIsOccupied(date, minutesFromStart) {
     return props.events.some(
       (e) =>
@@ -87,15 +132,7 @@ export default function Calendar(props) {
     );
   }
 
-  function checkIfOccupiedSlotIsInRange(date, minutesStart, minutesEnd) {
-    if (minutesStart == null || minutesEnd == null) return false;
-
-    const min = Math.min(minutesStart, minutesEnd);
-    const max = Math.max(minutesStart, minutesEnd);
-
-    return props.events.some((e) => isSameDay(e.date, date) && min <= e.start && max >= e.end);
-  }
-
+  //Create blocks
   function createTimeSlots(date) {
     const slots = Array.from({ length: SLOTS_PER_DAY }, (_, i) => i);
 
@@ -112,14 +149,11 @@ export default function Calendar(props) {
         <div
           className={clsx('slot', {
             isOccupied: checkIfSlotIsOccupied(date, minutesFromStart),
-            isSelected: isInSelectedRange(date, minutesFromStart),
             isFullHour: minutesFromStart % 60 === 0,
           })}
           key={`${date.toISOString()}-${minutesFromStart}`}
-          role="gridcell"
-          onPointerDown={(e) => handleDragStart(e, date, minutesFromStart)}
-          onPointerEnter={(e) => handleDragMove(e, date, minutesFromStart)}>
-          {`${hour}:${String(minutes).padStart(2, '0')}`}
+          role="gridcell">
+          {`${minutesToTimeString(minutesFromStart)}`}
         </div>
       );
     });
@@ -152,49 +186,35 @@ export default function Calendar(props) {
       return (
         <div className="day" key={date.toISOString()}>
           <h3>{`${DAYS[date.getDay()]} ${date.getDate()}. ${MONTHS[date.getMonth()]} `}</h3>
-          <div className="slots">
+          <div
+            className="slots"
+            onPointerCancel={(e) => handleCancel(e, date)}
+            onPointerMove={(e) => handleDragMove(e, date)}
+            onPointerDown={(e) => {
+              handleDragStart(e, date);
+            }}
+            onPointerUp={(e) => handleDragEnd(e, date)}>
             {createTimeSlots(date)}
             {createEventsBlocks(date)}
+            {showSelectionDiv &&
+              isSameDay(date, selectedSlots.startSlot?.date) &&
+              (() => {
+                const min = Math.min(selectedSlots.startSlot.minutes, selectedSlots.endSlot.minutes);
+                const max = Math.max(selectedSlots.startSlot.minutes, selectedSlots.endSlot.minutes);
+
+                return (
+                  <div
+                    style={{
+                      top: ((min - props.startMinutes) / SLOT_INTERVAL) * SLOT_HEIGHT,
+                      height: ((max - min) / SLOT_INTERVAL + 1) * SLOT_HEIGHT,
+                    }}
+                    ref={setSelectionElement}
+                    className="selection"></div>
+                );
+              })()}
           </div>
         </div>
       );
-    });
-  }
-
-  function handleDragStart(e, date, minutes) {
-    setShowEvent(false);
-    refs.setReference(e.currentTarget);
-    setSelectedSlots(
-      checkIfSlotIsOccupied(date, minutes) ?
-        { isSelected: false, startSlot: null, endSlot: null }
-      : {
-          isSelected: true,
-          startSlot: { date: date, minutes: minutes },
-          endSlot: { date: date, minutes: minutes },
-        },
-    );
-  }
-
-  function handleDragMove(e, date, minutes) {
-    if (e.pointerType === 'mouse' && (e.buttons & 1) !== 1) return;
-    setSelectedSlots((prev) => {
-      if (
-        !prev.isSelected ||
-        showEvent ||
-        checkIfOccupiedSlotIsInRange(date, prev.startSlot.minutes, minutes) ||
-        checkIfSlotIsOccupied(date, minutes)
-      )
-        return prev;
-      return { ...prev, endSlot: { date, minutes } };
-    });
-  }
-
-  function handleDragEnd(e) {
-    setShowEvent(true);
-    setSelectedSlots((prev) => {
-      return prev.endSlot.minutes >= prev.startSlot.minutes ?
-          { ...prev }
-        : { ...prev, startSlot: prev.endSlot, endSlot: prev.startSlot };
     });
   }
 
@@ -202,34 +222,33 @@ export default function Calendar(props) {
     <>
       <motion.div
         className="calendar"
-        onPointerUp={(e) => {
-          if (selectedSlots.isSelected) handleDragEnd(e);
-        }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}>
         <div className="dates">{createDateElements()}</div>
         {showEvent && selectedSlots.startSlot && selectedSlots.endSlot ?
-          <motion.div
-            ref={refs.setFloating}
-            style={floatingStyles}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}>
-            <AddEvent
-              showEvent={showEvent}
-              setShowEvent={setShowEvent}
-              selectedSlots={selectedSlots}
-              setSelectedSlots={setSelectedSlots}
-              startDate={props.startDate}
-              endDate={props.endDate}
-              setEvents={props.setEvents}
-              events={props.events}
-              day={selectedSlots.startSlot.date}
-              start={selectedSlots.startSlot.minutes}
-              end={selectedSlots.endSlot.minutes}
-            />
-          </motion.div>
+          <FloatingPortal>
+            <motion.div
+              ref={refs.setFloating}
+              style={floatingStyles}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}>
+              <AddEvent
+                showEvent={showEvent}
+                setShowEvent={setShowEvent}
+                selectedSlots={selectedSlots}
+                setSelectedSlots={setSelectedSlots}
+                startDate={props.startDate}
+                endDate={props.endDate}
+                setEvents={props.setEvents}
+                events={props.events}
+                day={selectedSlots.startSlot.date}
+                start={selectedSlots.startSlot.minutes}
+                end={selectedSlots.endSlot.minutes}
+              />
+            </motion.div>
+          </FloatingPortal>
         : null}
       </motion.div>
     </>
