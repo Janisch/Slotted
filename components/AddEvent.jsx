@@ -4,7 +4,12 @@ import React from 'react';
 
 export default function AddEvent(props) {
   const [randomPlaceholder, setRandomPlaceholder] = React.useState(() => getRandomPlaceholder());
-  const [eventForm, setEventForm] = React.useState({ title: "hey", date: props.day ? formatDate(props.day) : formatDate(props.timeFrame.startDate), start: minutesToTimeString(props.start), end: minutesToTimeString(props.end) });
+  const [eventForm, setEventForm] = React.useState({
+    title: '',
+    date: props.day ? props.day : props.timeFrame.startDate,
+    start: props.start,
+    end: props.end,
+  });
 
   function addEvent(e) {
     e.preventDefault();
@@ -27,67 +32,84 @@ export default function AddEvent(props) {
     props.setShowEvent ? props.setShowEvent(false) : null;
   }
 
-  function updateSelectedSlotsOnChange(e) {
+  function handleChange(e) {
     const { name, value } = e.target;
-    const time = name === 'date' ? formatDate(value) : timeToMinutes(value);
-    props.setSelectedSlots((prevSelectedSlots) => {
+
+    const nextDate = name === 'date' ? formatDate(value) : null;
+    const nextMinutes = name === 'start' || name === 'end' ? timeToMinutes(value) : null;
+
+    // 1) Form updaten
+    setEventForm((prev) => {
+      if (name === 'date') return { ...prev, date: nextDate };
+      if (name === 'start' || name === 'end') return { ...prev, [name]: nextMinutes };
+      return { ...prev, [name]: value };
+    });
+
+    // 2) Slots updaten
+    props.setSelectedSlots((prev) => {
       if (name === 'date') {
         return {
-          ...prevSelectedSlots,
-          startSlot: {
-            ...prevSelectedSlots.startSlot,
-            date: time,
-          },
-          endSlot: {
-            ...prevSelectedSlots.endSlot,
-            date: time,
-          },
+          ...prev,
+          startSlot: { ...prev.startSlot, date: nextDate },
+          endSlot: { ...prev.endSlot, date: nextDate },
         };
       }
-      return { ...prevSelectedSlots, [name]: { ...prevSelectedSlots[name], minutes: time } };
+      if (name === 'start') {
+        return {
+          ...prev,
+          startSlot: { ...prev.startSlot, minutes: nextMinutes },
+        };
+      }
+      if (name === 'end') {
+        return {
+          ...prev,
+          endSlot: { ...prev.endSlot, minutes: nextMinutes },
+        };
+      }
+      return prev;
     });
   }
 
-  function updateForm(e) {
-    const { name, value } = e.target;
-
-    setEventForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  }
-
   return (
-    <form
-      className="addEvent"
-      onSubmit={addEvent}
-    >
+    <form className="addEvent" onSubmit={addEvent}>
       <label htmlFor="title">Titel</label>
-      <input type="text" onChange={updateForm} placeholder={randomPlaceholder} value={eventForm.title} autoFocus name="title" id="title" required />
+      <input
+        type="text"
+        onChange={handleChange}
+        placeholder={randomPlaceholder}
+        value={eventForm.title}
+        autoFocus
+        name="title"
+        id="title"
+        required
+      />
       <label htmlFor="date">Datum</label>
       <input
-        type="date" onChange={updateForm}
+        type="date"
+        onChange={handleChange}
         required
-        value={eventForm.date}
+        value={formatDate(eventForm.date)}
         min={props.startDate ? formatDate(props.startDate) : ''}
         max={props.endDate ? formatDate(props.endDate) : ''}
         name="date"
         id="date"
       />
       <label htmlFor="start">Beginn</label>
-      <input onChange={updateForm}
+      <input
+        onChange={handleChange}
         required
         type="time"
         name="start"
-        value={eventForm.start}
+        value={minutesToTimeString(eventForm.start)}
         step={900}
         id="start"></input>
       <label htmlFor="end">Ende</label>
-      <input onChange={updateForm}
+      <input
+        onChange={handleChange}
         required
         type="time"
         name="end"
-        value={eventForm.end}
+        value={minutesToTimeString(eventForm.end)}
         step={900}
         id="end"></input>
       <button type="submit">Hinzufügen</button>

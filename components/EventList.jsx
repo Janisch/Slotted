@@ -9,9 +9,6 @@ import {
 import React from 'react';
 
 export default function EventList(props) {
-
-  const [eventForm, setEventForm] = React.useState(null);
-
   function deleteEvent(id) {
     props.setEvents((prevEvents) => {
       return prevEvents.filter((event) => {
@@ -42,7 +39,7 @@ export default function EventList(props) {
         <React.Fragment key={event.id}>
           {isNewDate ?
             <h4 className="eventListDayHeader">{getDateString(event.date)}</h4>
-            : null}
+          : null}
 
           <div
             className="eventListElement"
