@@ -37,7 +37,7 @@ function App() {
       <main>
         {timeFrameIsEmpty ?
           <SelectTimeFrame timeFrame={timeFrame} setTimeFrame={setTimeFrame} />
-        : <>
+          : <>
             <section className="eventControlContainer">
               <DateSelection
                 startDate={timeFrame.startDate}
@@ -56,7 +56,7 @@ function App() {
                   onEventHoverStart={handleEventHover}
                   onEventHoverExit={handleEventHover}
                 />
-              : null}
+                : null}
             </section>
             <Calendar
               startMinutes={timeFrame.startMinutes}

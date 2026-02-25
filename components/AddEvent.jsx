@@ -4,21 +4,15 @@ import React from 'react';
 
 export default function AddEvent(props) {
   const [randomPlaceholder, setRandomPlaceholder] = React.useState(() => getRandomPlaceholder());
+  const [eventForm, setEventForm] = React.useState({ title: "hey", date: props.day ? formatDate(props.day) : formatDate(props.timeFrame.startDate), start: minutesToTimeString(props.start), end: minutesToTimeString(props.end) });
+
   function addEvent(e) {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const eventDate = formData.get('date');
-    const eventStart = formData.get('startSlot');
-    const eventEnd = formData.get('endSlot');
-    const eventTitle = formData.get('titleInput');
     const newEvent = {
-      title: eventTitle,
-      date: formatDate(eventDate),
-      start: timeToMinutes(eventStart),
-      end: timeToMinutes(eventEnd),
+      ...eventForm,
       id: crypto.randomUUID(),
     };
-    e.target.reset();
+
     props.setEvents((prevEvents) => {
       return [...prevEvents, newEvent].sort((a, b) => {
         const dateDiff = a.date - b.date;
@@ -54,39 +48,48 @@ export default function AddEvent(props) {
     });
   }
 
+  function updateForm(e) {
+    const { name, value } = e.target;
+
+    setEventForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+
   return (
     <form
       className="addEvent"
       onSubmit={addEvent}
-      onChange={props.setSelectedSlots ? updateSelectedSlotsOnChange : null}>
-      <label htmlFor="titleInput">Titel</label>
-      <input type="text" placeholder={randomPlaceholder} autoFocus name="titleInput" id="titleInput" required />
+    >
+      <label htmlFor="title">Titel</label>
+      <input type="text" onChange={updateForm} placeholder={randomPlaceholder} value={eventForm.title} autoFocus name="title" id="title" required />
       <label htmlFor="date">Datum</label>
       <input
-        type="date"
+        type="date" onChange={updateForm}
         required
-        defaultValue={props.day ? formatDate(props.day) : formatDate(props.timeFrame.startDate)}
+        value={eventForm.date}
         min={props.startDate ? formatDate(props.startDate) : ''}
         max={props.endDate ? formatDate(props.endDate) : ''}
         name="date"
         id="date"
       />
-      <label htmlFor="startSlot">Beginn</label>
-      <input
+      <label htmlFor="start">Beginn</label>
+      <input onChange={updateForm}
         required
         type="time"
-        name="startSlot"
-        defaultValue={minutesToTimeString(props.start)}
+        name="start"
+        value={eventForm.start}
         step={900}
-        id="startSlot"></input>
-      <label htmlFor="endSlot">Ende</label>
-      <input
+        id="start"></input>
+      <label htmlFor="end">Ende</label>
+      <input onChange={updateForm}
         required
         type="time"
-        name="endSlot"
-        defaultValue={minutesToTimeString(props.end)}
+        name="end"
+        value={eventForm.end}
         step={900}
-        id="endSlot"></input>
+        id="end"></input>
       <button type="submit">Hinzufügen</button>
     </form>
   );
