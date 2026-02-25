@@ -35,6 +35,10 @@ export default function Calendar(props) {
     endSlot: null,
   });
 
+  React.useEffect(() => {
+    if (!showEvent) setSelectedSlots({ startSlot: null, endSlot: null })
+  }, [showEvent])
+
   //ref
   const dragRef = React.useRef({
     pointerId: null,
@@ -47,12 +51,17 @@ export default function Calendar(props) {
   const showSelectionDiv = showEvent || Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
 
   //floating
-  const { refs, floatingStyles } = useFloating({
+  const { refs, floatingStyles, context } = useFloating({
+    open: showEvent,
+    onOpenChange: setShowEvent,
+
     strategy: 'fixed',
     placement: 'right-start',
     whileElementsMounted: autoUpdate,
     middleware: [offset(10), flip(), shift({ padding: 8 })],
   });
+
+  const dismiss = useDismiss(context)
 
   //functions
 
