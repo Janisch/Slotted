@@ -28,12 +28,11 @@ export default function EventList(props) {
   function createEventElements() {
     let lastDate = null;
 
-    return props.events.map((event, index) => {
+    return props.events.map((event) => {
       const isNewDate = lastDate === null || !isSameDay(lastDate, event.date);
       lastDate = event.date;
-      const inFrame = dateIsInTimeFrame(event.date, props.timeFrame.startDate, props.timeFrame.endDate);
-
-      if (!inFrame) return null;
+      //const inFrame = dateIsInTimeFrame(event.date, props.timeFrame.startDate, props.timeFrame.endDate);
+      //if (!inFrame) return null;
 
       return (
         <React.Fragment key={event.id}>

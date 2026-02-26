@@ -33,8 +33,8 @@ function App() {
   const [timeFrame, setTimeFrame] = React.useState({
     startDate: new Date(2026, 1, 24),
     endDate: new Date(2026, 2, 2),
-    startMinutes: 360,
-    endMinutes: 1020,
+    startMinutes: 0,
+    endMinutes: 1440,
   });
 
   //Derived Variables
@@ -53,12 +53,6 @@ function App() {
           <SelectTimeFrame timeFrame={timeFrame} setTimeFrame={setTimeFrame} />
         : <>
             <section className="eventControlContainer">
-              <DateSelection
-                startDate={timeFrame.startDate}
-                endDate={timeFrame.endDate}
-                timeFrame={timeFrame}
-                setTimeFrame={setTimeFrame}
-              />{' '}
               {<AddEvent setEvents={setEvents} timeFrame={timeFrame} />}
               {events.length > 0 ?
                 <EventList
@@ -72,7 +66,10 @@ function App() {
                 />
               : null}
             </section>
+
             <Calendar
+              timeFrame={timeFrame}
+              setTimeFrame={setTimeFrame}
               startMinutes={timeFrame.startMinutes}
               endMinutes={timeFrame.endMinutes}
               startDate={timeFrame.startDate}

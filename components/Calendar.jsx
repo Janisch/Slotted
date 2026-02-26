@@ -10,6 +10,7 @@ import {
   minutesAreInTimeFrame,
 } from '../timeUtils';
 import AddEvent from '../components/AddEvent';
+import DateSelection from './DateSelection';
 import {
   useFloating,
   useDismiss,
@@ -36,8 +37,8 @@ export default function Calendar(props) {
   });
 
   React.useEffect(() => {
-    if (!showEvent) setSelectedSlots({ startSlot: null, endSlot: null })
-  }, [showEvent])
+    if (!showEvent) setSelectedSlots({ startSlot: null, endSlot: null });
+  }, [showEvent]);
 
   //ref
   const dragRef = React.useRef({
@@ -61,7 +62,7 @@ export default function Calendar(props) {
     middleware: [offset(10), flip(), shift({ padding: 8 })],
   });
 
-  const dismiss = useDismiss(context)
+  const dismiss = useDismiss(context);
 
   //functions
 
@@ -106,7 +107,7 @@ export default function Calendar(props) {
     dragRef.current.pointerId = null;
     const minutes = pointerToMinutes(e);
     setSelectedSlots((prev) => {
-      const didSelect = minutes !== prev.startSlot.minutes
+      const didSelect = minutes !== prev.startSlot.minutes;
       const next = didSelect ? { ...prev, endSlot: { date, minutes } } : { startSlot: null, endSlot: null };
       setShowEvent(didSelect);
       return next;
@@ -220,6 +221,12 @@ export default function Calendar(props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}>
+        <DateSelection
+          startDate={props.startDate}
+          endDate={props.endDate}
+          timeFrame={props.timeFrame}
+          setTimeFrame={props.setTimeFrame}
+        />{' '}
         <div className="dates">{createDateElements()}</div>
         {showEvent && selectedSlots.startSlot && selectedSlots.endSlot ?
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, ease: 'easeOut' }}>
@@ -239,7 +246,7 @@ export default function Calendar(props) {
               end={selectedSlots.endSlot.minutes}
             />
           </motion.div>
-          : null}
+        : null}
       </motion.div>
     </>
   );
