@@ -42,9 +42,15 @@ export default function Calendar(props) {
 
   //ref
   const dragRef = React.useRef({
+    mode: null, //create || move
     pointerId: null,
     isDragging: false,
     startDay: null,
+    //events
+    eventId: null,
+    eventStart: null,
+    eventEnd: null,
+    eventDuration: null
   });
 
   //Derived Variables
@@ -76,7 +82,8 @@ export default function Calendar(props) {
     return minutes;
   };
 
-  function handleDragStart(e, date) {
+  function handleSlotDragStart(e, date) {
+    console.log("Handle Drag Slot Start fired")
     e.currentTarget.setPointerCapture(e.pointerId);
     const minutes = pointerToMinutes(e);
     if (checkIfSlotIsOccupied(date, minutes)) return;
@@ -84,16 +91,44 @@ export default function Calendar(props) {
     dragRef.current.isDragging = true;
     dragRef.current.pointerId = e.pointerId;
     dragRef.current.startDay = date;
+    dragRef.current.mode = "create";
 
     setSelectedSlots({ startSlot: { date: date, minutes: minutes }, endSlot: { date: date, minutes: minutes } });
   }
+  function handleEventDragStart(e, eventInfo) {
+    e.stopPropagation();
+    const { title, date, start, end, id } = eventInfo;
+    console.log(id)
+
+    dragRef.current.isDragging = true;
+    dragRef.current.mode = "move";
+    dragRef.current.eventId = id;
+    dragRef.current.eventStart = start;
+    dragRef.current.eventEnd = end;
+    dragRef.current.eventDuration = end - start;
+    console.log("Handle Drag Event Slot Start fired")
+
+  }
 
   function handleDragMove(e, date) {
+
+    if (dragRef.current.mode === "move") {
+      const minutes = pointerToMinutes(e);
+      if (dragRef.current.eventStart != minutes) {
+        console.log("CHANGED")
+        dragRef.current.eventStart = minutes;
+        dragRef.current.eventEnd = minutes + dragRef.current.eventDuration;
+      }
+    }
+
     if (!dragRef.current.isDragging) return;
     if (e.pointerId !== dragRef.current.pointerId) return;
     if (!isSameDay(date, dragRef.current.startDay)) return;
     const minutes = pointerToMinutes(e);
     if (minutes == null) return;
+
+
+
     setSelectedSlots((prev) => ({
       ...prev,
       endSlot: { date, minutes },
@@ -101,6 +136,12 @@ export default function Calendar(props) {
   }
 
   function handleDragEnd(e, date) {
+    if (dragRef.current.mode === "move") {
+      props.setEvents((prev) => prev.map((ev) => (ev.id === dragRef.current.eventId ? { ...ev, start: dragRef.current.eventStart, end: dragRef.current.eventEnd } : ev)));
+    }
+
+
+
     if (e.pointerId !== dragRef.current.pointerId) return;
     dragRef.current.isDragging = false;
     e.currentTarget.releasePointerCapture(e.pointerId);
@@ -160,19 +201,19 @@ export default function Calendar(props) {
       .filter(
         (e) => isSameDay(date, e.date) && minutesAreInTimeFrame(e.start, e.end, props.startMinutes, props.endMinutes),
       )
-      .map((e) => (
-        <button
+      .map((event) => (
+        <button onPointerDown={(e) => handleEventDragStart(e, event)}
           onPointerEnter={() => {
-            props.onEventHoverStart(e);
+            props.onEventHoverStart(event);
           }}
           onPointerLeave={props.onEventHoverExit}
           style={{
-            top: (e.start / SLOT_INTERVAL) * SLOT_HEIGHT - (props.startMinutes / SLOT_INTERVAL) * SLOT_HEIGHT,
-            height: (e.end / SLOT_INTERVAL - e.start / SLOT_INTERVAL) * SLOT_HEIGHT,
+            top: (event.start / SLOT_INTERVAL) * SLOT_HEIGHT - (props.startMinutes / SLOT_INTERVAL) * SLOT_HEIGHT,
+            height: (event.end / SLOT_INTERVAL - event.start / SLOT_INTERVAL) * SLOT_HEIGHT,
           }}
-          key={`${e.title}-${e.start}-${e.end}`}
-          className={clsx('event', { currentSelection: props.selectedEvent === e })}>
-          <span className="eventTitle">{e.title}</span>
+          key={`${event.title}-${event.start}-${event.end}`}
+          className={clsx('event', { currentSelection: props.selectedEvent === event })}>
+          <span className="eventTitle">{event.title}</span>
         </button>
       ));
   }
@@ -187,7 +228,7 @@ export default function Calendar(props) {
             onPointerCancel={(e) => handleCancel(e, date)}
             onPointerMove={(e) => handleDragMove(e, date)}
             onPointerDown={(e) => {
-              handleDragStart(e, date);
+              handleSlotDragStart(e, date);
             }}
             onPointerUp={(e) => handleDragEnd(e, date)}>
             {createTimeSlots(date)}
@@ -246,7 +287,7 @@ export default function Calendar(props) {
               end={selectedSlots.endSlot.minutes}
             />
           </motion.div>
-        : null}
+          : null}
       </motion.div>
     </>
   );
