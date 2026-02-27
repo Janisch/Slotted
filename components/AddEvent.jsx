@@ -27,8 +27,7 @@ export default function AddEvent(props) {
         return a.end - b.end;
       });
     });
-    props.setShowEvent ? props.setShowEvent(false) : null;
-    props.setSelectedSlots({ startSlot: null, endSlot: null });
+    props.clearSelection();
   }
 
   function handleChange(e) {

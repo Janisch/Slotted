@@ -11,17 +11,7 @@ import {
 } from '../timeUtils';
 import AddEvent from '../components/AddEvent';
 import DateSelection from './DateSelection';
-import {
-  useFloating,
-  useDismiss,
-  offset,
-  flip,
-  shift,
-  autoUpdate,
-  FloatingPortal,
-  computePosition,
-  autoPlacement,
-} from '@floating-ui/react';
+import { useFloating, useDismiss, offset, flip, shift, autoUpdate } from '@floating-ui/react';
 import { motion } from 'motion/react';
 
 export default function Calendar(props) {
@@ -30,15 +20,12 @@ export default function Calendar(props) {
   const SLOTS_PER_DAY = (24 * 60) / SLOT_INTERVAL;
 
   //State
-  const [showEvent, setShowEvent] = React.useState(false);
+
   const [selectedSlots, setSelectedSlots] = React.useState({
     startSlot: null,
     endSlot: null,
   });
-
-  React.useEffect(() => {
-    if (!showEvent) setSelectedSlots({ startSlot: null, endSlot: null });
-  }, [showEvent]);
+  const [selectionCommitted, setSelectionCommitted] = React.useState(false);
 
   //ref
   const dragRef = React.useRef({
@@ -50,27 +37,23 @@ export default function Calendar(props) {
     eventId: null,
     eventStart: null,
     eventEnd: null,
-    eventDuration: null
+    eventDuration: null,
   });
 
   //Derived Variables
   const dates = getDates(props.startDate, props.endDate);
-  const showSelectionDiv = showEvent || Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
+  const showSelectionDiv = Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
+  const hasSelection = Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
+  const showEvent = hasSelection && selectionCommitted;
 
-  //floating
-  const { refs, floatingStyles, context } = useFloating({
-    open: showEvent,
-    onOpenChange: setShowEvent,
-
-    strategy: 'fixed',
-    placement: 'right-start',
-    whileElementsMounted: autoUpdate,
-    middleware: [offset(10), flip(), shift({ padding: 8 })],
-  });
-
-  const dismiss = useDismiss(context);
+  console.log(hasSelection);
 
   //functions
+
+  const clearSelection = () => {
+    setSelectedSlots({ startSlot: null, endSlot: null });
+    setSelectionCommitted(false);
+  };
 
   const pointerToMinutes = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -83,39 +66,34 @@ export default function Calendar(props) {
   };
 
   function handleSlotDragStart(e, date) {
-    console.log("Handle Drag Slot Start fired")
+    setSelectionCommitted(false);
     e.currentTarget.setPointerCapture(e.pointerId);
     const minutes = pointerToMinutes(e);
     if (checkIfSlotIsOccupied(date, minutes)) return;
-    setShowEvent(false);
     dragRef.current.isDragging = true;
     dragRef.current.pointerId = e.pointerId;
     dragRef.current.startDay = date;
-    dragRef.current.mode = "create";
+    dragRef.current.mode = 'create';
 
     setSelectedSlots({ startSlot: { date: date, minutes: minutes }, endSlot: { date: date, minutes: minutes } });
   }
   function handleEventDragStart(e, eventInfo) {
     e.stopPropagation();
     const { title, date, start, end, id } = eventInfo;
-    console.log(id)
-
     dragRef.current.isDragging = true;
-    dragRef.current.mode = "move";
+    dragRef.current.mode = 'move';
     dragRef.current.eventId = id;
     dragRef.current.eventStart = start;
     dragRef.current.eventEnd = end;
     dragRef.current.eventDuration = end - start;
-    console.log("Handle Drag Event Slot Start fired")
-
+    console.log('Handle Drag Event Slot Start fired');
   }
 
   function handleDragMove(e, date) {
-
-    if (dragRef.current.mode === "move") {
+    if (dragRef.current.mode === 'move') {
       const minutes = pointerToMinutes(e);
       if (dragRef.current.eventStart != minutes) {
-        console.log("CHANGED")
+        console.log('CHANGED');
         dragRef.current.eventStart = minutes;
         dragRef.current.eventEnd = minutes + dragRef.current.eventDuration;
       }
@@ -127,8 +105,6 @@ export default function Calendar(props) {
     const minutes = pointerToMinutes(e);
     if (minutes == null) return;
 
-
-
     setSelectedSlots((prev) => ({
       ...prev,
       endSlot: { date, minutes },
@@ -136,11 +112,15 @@ export default function Calendar(props) {
   }
 
   function handleDragEnd(e, date) {
-    if (dragRef.current.mode === "move") {
-      props.setEvents((prev) => prev.map((ev) => (ev.id === dragRef.current.eventId ? { ...ev, start: dragRef.current.eventStart, end: dragRef.current.eventEnd } : ev)));
+    if (dragRef.current.mode === 'move') {
+      props.setEvents((prev) =>
+        prev.map((ev) =>
+          ev.id === dragRef.current.eventId ?
+            { ...ev, start: dragRef.current.eventStart, end: dragRef.current.eventEnd }
+          : ev,
+        ),
+      );
     }
-
-
 
     if (e.pointerId !== dragRef.current.pointerId) return;
     dragRef.current.isDragging = false;
@@ -149,9 +129,17 @@ export default function Calendar(props) {
     const minutes = pointerToMinutes(e);
     setSelectedSlots((prev) => {
       const didSelect = minutes !== prev.startSlot.minutes;
-      const next = didSelect ? { ...prev, endSlot: { date, minutes } } : { startSlot: null, endSlot: null };
-      setShowEvent(didSelect);
-      return next;
+      if (!didSelect) {
+        setSelectionCommitted(false);
+        return { startSlot: null, endSlot: null };
+      }
+      const min = Math.min(prev.startSlot.minutes, minutes);
+      const max = Math.max(prev.startSlot.minutes, minutes);
+      setSelectionCommitted(true);
+      return {
+        startSlot: { date, minutes: min },
+        endSlot: { date, minutes: max },
+      };
     });
   }
 
@@ -202,7 +190,8 @@ export default function Calendar(props) {
         (e) => isSameDay(date, e.date) && minutesAreInTimeFrame(e.start, e.end, props.startMinutes, props.endMinutes),
       )
       .map((event) => (
-        <button onPointerDown={(e) => handleEventDragStart(e, event)}
+        <button
+          onPointerDown={(e) => handleEventDragStart(e, event)}
           onPointerEnter={() => {
             props.onEventHoverStart(event);
           }}
@@ -255,6 +244,23 @@ export default function Calendar(props) {
     });
   }
 
+  //floating
+  const { refs, floatingStyles, context } = useFloating({
+    open: showEvent,
+    onOpenChange: (open) => {
+      if (!open) {
+        clearSelection();
+      }
+    },
+
+    strategy: 'fixed',
+    placement: 'right-start',
+    whileElementsMounted: autoUpdate,
+    middleware: [offset(10), flip(), shift({ padding: 8 })],
+  });
+
+  const dismiss = useDismiss(context);
+
   return (
     <>
       <motion.div
@@ -269,13 +275,13 @@ export default function Calendar(props) {
           setTimeFrame={props.setTimeFrame}
         />{' '}
         <div className="dates">{createDateElements()}</div>
-        {showEvent && selectedSlots.startSlot && selectedSlots.endSlot ?
+        {showEvent ?
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, ease: 'easeOut' }}>
             <AddEvent
               floatingRef={refs.setFloating}
               floatingStyle={floatingStyles}
+              setSelectionCommitted={setSelectionCommitted}
               showEvent={showEvent}
-              setShowEvent={setShowEvent}
               selectedSlots={selectedSlots}
               setSelectedSlots={setSelectedSlots}
               startDate={props.startDate}
@@ -285,9 +291,10 @@ export default function Calendar(props) {
               day={selectedSlots.startSlot.date}
               start={selectedSlots.startSlot.minutes}
               end={selectedSlots.endSlot.minutes}
+              clearSelection={clearSelection}
             />
           </motion.div>
-          : null}
+        : null}
       </motion.div>
     </>
   );
