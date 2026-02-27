@@ -16,7 +16,7 @@ import { motion } from 'motion/react';
 
 export default function Calendar(props) {
   //Statics
-  const SLOT_INTERVAL = 15;
+  const SLOT_INTERVAL = 30;
   const SLOTS_PER_DAY = (24 * 60) / SLOT_INTERVAL;
 
   //State
@@ -47,9 +47,6 @@ export default function Calendar(props) {
   const hasSelection = Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
   const showEvent = hasSelection && selectionCommitted;
   const hasDragPreview = eventDragPreview?.eventId != null;
-
-  console.log(eventDragPreview?.eventId);
-  console.log(props.events);
 
   //functions
 
@@ -83,27 +80,34 @@ export default function Calendar(props) {
   function handleEventDragStart(e, eventInfo) {
     e.stopPropagation();
     const { title, date, start, end, id } = eventInfo;
+    const offset = pointerToMinutes(e);
     dragRef.current.isDragging = true;
     e.currentTarget.setPointerCapture(e.pointerId);
     dragRef.current.pointerId = e.pointerId;
     dragRef.current.mode = 'move';
     dragRef.current.eventId = id;
     dragRef.current.eventStart = start;
+    dragRef.current.offset = offset;
     dragRef.current.eventEnd = end;
     dragRef.current.eventDuration = end - start;
     setEventDragPreview((prev) => {
-      return { ...prev, start: [start], eventId: id };
+      return { start: start, end: end, eventId: id };
     });
   }
 
   function handleDragMove(e, date) {
     if (dragRef.current.mode === 'move') {
       const minutes = pointerToMinutes(e);
+
       if (dragRef.current.eventStart != minutes) {
         dragRef.current.eventStart = minutes;
         dragRef.current.eventEnd = minutes + dragRef.current.eventDuration;
         setEventDragPreview((prev) => {
-          return { ...prev, start: [minutes], end: [minutes + dragRef.current.eventDuration] };
+          return {
+            ...prev,
+            start: minutes - dragRef.current.offset,
+            end: minutes + dragRef.current.eventDuration - dragRef.current.offset,
+          };
         });
       }
       return;
@@ -128,7 +132,11 @@ export default function Calendar(props) {
       props.setEvents((prev) =>
         prev.map((ev) =>
           ev.id === dragRef.current.eventId ?
-            { ...ev, start: dragRef.current.eventStart, end: dragRef.current.eventEnd }
+            {
+              ...ev,
+              start: dragRef.current.eventStart - dragRef.current.offset,
+              end: dragRef.current.eventEnd - dragRef.current.offset,
+            }
           : ev,
         ),
       );
@@ -220,7 +228,7 @@ export default function Calendar(props) {
           }}
           onPointerLeave={props.onEventHoverExit}
           style={
-            hasDragPreview && eventDragPreview.eventId === event.id ?
+            hasDragPreview && eventDragPreview?.eventId === event.id ?
               {
                 top:
                   (eventDragPreview.start / SLOT_INTERVAL) * SLOT_HEIGHT -
