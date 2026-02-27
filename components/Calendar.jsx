@@ -12,6 +12,7 @@ import {
 import AddEvent from '../components/AddEvent';
 import DateSelection from './DateSelection';
 import { useFloating, useDismiss, offset, flip, shift, autoUpdate } from '@floating-ui/react';
+import { useDragController } from '../src/useDragController';
 import { motion } from 'motion/react';
 
 export default function Calendar(props) {
@@ -20,166 +21,38 @@ export default function Calendar(props) {
   const SLOTS_PER_DAY = (24 * 60) / SLOT_INTERVAL;
 
   //State
-
-  const [eventDragPreview, setEventDragPreview] = React.useState({ start: null, end: null, eventId: null });
   const [selectedSlots, setSelectedSlots] = React.useState({
     startSlot: null,
     endSlot: null,
   });
   const [selectionCommitted, setSelectionCommitted] = React.useState(false);
 
-  //ref
-  const dragRef = React.useRef({
-    mode: null, //create || move
-    pointerId: null,
-    isDragging: false,
-    startDay: null,
-    //events
-    eventId: null,
-    eventStart: null,
-    eventEnd: null,
-    eventDuration: null,
-  });
+  const { eventDragPreview, handleSlotDragStart, handleEventDragStart, handleDragMove, handleDragEnd, handleCancel } =
+    useDragController({
+      SLOT_HEIGHT,
+      SLOT_INTERVAL,
+      startMinutes: props.startMinutes,
+      endMinutes: props.endMinutes,
+      setSelectionCommitted,
+      checkIfSlotIsOccupied,
+      setSelectedSlots,
+      setEvents: props.setEvents,
+    });
 
   //Derived Variables
-  const dates = getDates(props.startDate, props.endDate);
+  const dates = React.useMemo(() => {
+    return getDates(props.startDate, props.endDate);
+  }, [props.startDate, props.endDate]);
   const showSelectionDiv = Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
   const hasSelection = Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
   const showEvent = hasSelection && selectionCommitted;
   const hasDragPreview = eventDragPreview?.eventId != null;
 
   //functions
-
   const clearSelection = () => {
     setSelectedSlots({ startSlot: null, endSlot: null });
     setSelectionCommitted(false);
   };
-
-  const pointerToMinutes = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const slotIndex = Math.floor(y / SLOT_HEIGHT);
-    const minutes = props.startMinutes + slotIndex * SLOT_INTERVAL;
-    if (minutes > props.endMinutes) return props.endMinutes;
-    if (minutes < props.startMinutes) return props.startMinutes;
-    return minutes;
-  };
-
-  function handleSlotDragStart(e, date) {
-    setSelectionCommitted(false);
-    e.currentTarget.setPointerCapture(e.pointerId);
-    const minutes = pointerToMinutes(e);
-    if (checkIfSlotIsOccupied(date, minutes)) return;
-    dragRef.current.isDragging = true;
-    dragRef.current.pointerId = e.pointerId;
-    dragRef.current.startDay = date;
-    dragRef.current.mode = 'create';
-
-    setSelectedSlots({ startSlot: { date: date, minutes: minutes }, endSlot: { date: date, minutes: minutes } });
-  }
-  function handleEventDragStart(e, eventInfo) {
-    e.stopPropagation();
-    const { title, date, start, end, id } = eventInfo;
-    const offset = pointerToMinutes(e);
-    dragRef.current.isDragging = true;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    dragRef.current.pointerId = e.pointerId;
-    dragRef.current.mode = 'move';
-    dragRef.current.eventId = id;
-    dragRef.current.eventStart = start;
-    dragRef.current.offset = offset;
-    dragRef.current.eventEnd = end;
-    dragRef.current.eventDuration = end - start;
-    setEventDragPreview((prev) => {
-      return { start: start, end: end, eventId: id };
-    });
-  }
-
-  function handleDragMove(e, date) {
-    if (dragRef.current.mode === 'move') {
-      const minutes = pointerToMinutes(e);
-
-      if (dragRef.current.eventStart != minutes) {
-        dragRef.current.eventStart = minutes;
-        dragRef.current.eventEnd = minutes + dragRef.current.eventDuration;
-        setEventDragPreview((prev) => {
-          return {
-            ...prev,
-            start: minutes - dragRef.current.offset,
-            end: minutes + dragRef.current.eventDuration - dragRef.current.offset,
-          };
-        });
-      }
-      return;
-    }
-
-    if (!dragRef.current.isDragging) return;
-    if (e.pointerId !== dragRef.current.pointerId) return;
-    if (!isSameDay(date, dragRef.current.startDay)) return;
-    const minutes = pointerToMinutes(e);
-    if (minutes == null) return;
-
-    setSelectedSlots((prev) => ({
-      ...prev,
-      endSlot: { date, minutes },
-    }));
-  }
-
-  function handleDragEnd(e, date) {
-    if (dragRef.current.mode === 'move') {
-      if (e.pointerId !== dragRef.current.pointerId) return;
-      e.currentTarget.releasePointerCapture(dragRef.current.pointerId);
-      props.setEvents((prev) =>
-        prev.map((ev) =>
-          ev.id === dragRef.current.eventId ?
-            {
-              ...ev,
-              start: dragRef.current.eventStart - dragRef.current.offset,
-              end: dragRef.current.eventEnd - dragRef.current.offset,
-            }
-          : ev,
-        ),
-      );
-      setEventDragPreview(null);
-
-      dragRef.current.isDragging = false;
-      dragRef.current.mode = null;
-      dragRef.current.eventId = null;
-      dragRef.current.eventStart = null;
-      dragRef.current.eventEnd = null;
-      dragRef.current.eventDuration = null;
-
-      return;
-    }
-
-    if (e.pointerId !== dragRef.current.pointerId) return;
-    dragRef.current.isDragging = false;
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    dragRef.current.pointerId = null;
-    const minutes = pointerToMinutes(e);
-    setSelectedSlots((prev) => {
-      const didSelect = minutes !== prev.startSlot.minutes;
-      if (!didSelect) {
-        setSelectionCommitted(false);
-        return { startSlot: null, endSlot: null };
-      }
-      const min = Math.min(prev.startSlot.minutes, minutes);
-      const max = Math.max(prev.startSlot.minutes, minutes);
-      setSelectionCommitted(true);
-      dragRef.current.mode = null;
-      return {
-        startSlot: { date, minutes: min },
-        endSlot: { date, minutes: max },
-      };
-    });
-  }
-
-  function handleCancel(e, date) {
-    if (e.pointerId !== dragRef.current.pointerId) return;
-    dragRef.current.isDragging = false;
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    dragRef.current.pointerId = null;
-  }
 
   function checkIfSlotIsOccupied(date, minutesFromStart) {
     return props.events.some(
