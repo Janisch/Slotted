@@ -115,7 +115,9 @@ export default function Calendar(props) {
           }
           key={`${event.title}-${event.start}-${event.end}`}
           className={clsx('event', { currentSelection: props.selectedEvent === event })}>
+          <div className="topHandel">TOP</div>
           <span className="eventTitle">{event.title}</span>
+          <div className="botHandel">BOT</div>
         </button>
       ));
   }

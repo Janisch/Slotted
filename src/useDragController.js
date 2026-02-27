@@ -42,6 +42,8 @@ export function useDragController({
     return minutes;
   };
 
+  function checkIfEventInPlace() {}
+
   function handleSlotDragStart(e, date) {
     setSelectionCommitted(false);
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -58,16 +60,17 @@ export function useDragController({
   function handleEventDragStart(e, eventInfo) {
     e.stopPropagation();
     const { title, date, start, end, id } = eventInfo;
-    const offset = pointerToMinutes(e);
+
     dragRef.current.isDragging = true;
     e.currentTarget.setPointerCapture(e.pointerId);
     dragRef.current.pointerId = e.pointerId;
     dragRef.current.mode = 'move';
     dragRef.current.eventId = id;
     dragRef.current.eventStart = start;
-    dragRef.current.offset = offset;
     dragRef.current.eventEnd = end;
     dragRef.current.eventDuration = end - start;
+    const offset = pointerToMinutes(e);
+    dragRef.current.offset = offset;
     setEventDragPreview({ start: start, end: end, eventId: id });
   }
 
@@ -117,10 +120,12 @@ export function useDragController({
   function handleDragEnd(e, date) {
     if (e.pointerId !== dragRef.current.pointerId) return;
     if (dragRef.current.mode === 'move') {
+      const minutes = pointerToMinutes(e);
       e.currentTarget.releasePointerCapture(dragRef.current.pointerId);
+
       setEvents((prev) =>
         prev.map((ev) =>
-          ev.id === dragRef.current.eventId ?
+          ev.id === dragRef.current.eventId && dragRef.current.eventStart === minutes ?
             {
               ...ev,
               start: dragRef.current.eventStart - dragRef.current.offset,
