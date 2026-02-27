@@ -206,11 +206,13 @@ main {
 }
 
 .event {
-  font-family: Satoshi;
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  font-family: Satoshi;
   position: absolute;
   width: 75%;
   font-size: auto;
@@ -224,9 +226,35 @@ main {
     color 0.1s;
 }
 
+.event:hover {
+  cursor: grab;
+}
+
 .event.currentSelection {
   background-color: #ff9a00;
   color: black;
+}
+
+.topHandle,
+.botHandle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8px;
+  cursor: ns-resize;
+}
+
+.topHandle {
+  top: 0;
+}
+
+.botHandle {
+  bottom: 0;
+}
+
+.topHandle:hover,
+.botHandle:hover {
+  cursor: n-resize;
 }
 
 .addEvent {

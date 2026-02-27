@@ -27,17 +27,24 @@ export default function Calendar(props) {
   });
   const [selectionCommitted, setSelectionCommitted] = React.useState(false);
 
-  const { eventDragPreview, handleSlotDragStart, handleEventDragStart, handleDragMove, handleDragEnd, handleCancel } =
-    useDragController({
-      SLOT_HEIGHT,
-      SLOT_INTERVAL,
-      startMinutes: props.startMinutes,
-      endMinutes: props.endMinutes,
-      setSelectionCommitted,
-      checkIfSlotIsOccupied,
-      setSelectedSlots,
-      setEvents: props.setEvents,
-    });
+  const {
+    eventDragPreview,
+    handleSlotDragStart,
+    handleEventDragStart,
+    handleEventResizeStart,
+    handleDragMove,
+    handleDragEnd,
+    handleCancel,
+  } = useDragController({
+    SLOT_HEIGHT,
+    SLOT_INTERVAL,
+    startMinutes: props.startMinutes,
+    endMinutes: props.endMinutes,
+    setSelectionCommitted,
+    checkIfSlotIsOccupied,
+    setSelectedSlots,
+    setEvents: props.setEvents,
+  });
 
   //Derived Variables
   const dates = React.useMemo(() => {
@@ -115,9 +122,17 @@ export default function Calendar(props) {
           }
           key={`${event.title}-${event.start}-${event.end}`}
           className={clsx('event', { currentSelection: props.selectedEvent === event })}>
-          <div className="topHandel">TOP</div>
+          <div
+            onPointerDown={(e) => {
+              handleEventResizeStart(e, event, 'resize-top');
+            }}
+            className="topHandle"></div>
           <span className="eventTitle">{event.title}</span>
-          <div className="botHandel">BOT</div>
+          <div
+            onPointerDown={(e) => {
+              handleEventResizeStart(e, event, 'resize-bot');
+            }}
+            className="botHandle"></div>
         </button>
       ));
   }

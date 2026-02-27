@@ -20,6 +20,9 @@ export function useDragController({
     isDragging: false,
     startDay: null,
     eventId: null,
+    eventOriginalStart: null,
+    eventOriginalEnd: null,
+    eventDidMove: false,
     eventStart: null,
     eventEnd: null,
     eventDuration: null,
@@ -60,18 +63,34 @@ export function useDragController({
   function handleEventDragStart(e, eventInfo) {
     e.stopPropagation();
     const { title, date, start, end, id } = eventInfo;
-
-    dragRef.current.isDragging = true;
     e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current.eventDidMove = false;
+    dragRef.current.isDragging = true;
     dragRef.current.pointerId = e.pointerId;
     dragRef.current.mode = 'move';
     dragRef.current.eventId = id;
     dragRef.current.eventStart = start;
+    dragRef.current.eventOriginalStart = start;
     dragRef.current.eventEnd = end;
+    dragRef.current.eventOriginalEnd = end;
     dragRef.current.eventDuration = end - start;
     const offset = pointerToMinutes(e);
     dragRef.current.offset = offset;
     setEventDragPreview({ start: start, end: end, eventId: id });
+  }
+
+  function handleEventResizeStart(e, eventInfo, resizeType) {
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const { title, date, start, end, id } = eventInfo;
+    dragRef.current.isDragging = true;
+    dragRef.current.pointerId = e.pointerId;
+    dragRef.current.mode = resizeType;
+    dragRef.current.eventId = id;
+    dragRef.current.eventStart = start;
+    dragRef.current.eventEnd = end;
+    setEventDragPreview({ start: start, end: end, eventId: id });
+    console.log(resizeType + ' start');
   }
 
   function handleDragMove(e, date) {
@@ -100,6 +119,8 @@ export function useDragController({
       dragRef.current.eventStart = clampedStart + dragRef.current.offset;
       dragRef.current.eventEnd = clampedEnd + dragRef.current.offset;
 
+      dragRef.current.eventDidMove = true;
+
       setEventDragPreview((prev) => ({
         ...prev,
         start: clampedStart,
@@ -109,27 +130,49 @@ export function useDragController({
       return;
     }
 
-    if (!isSameDay(date, dragRef.current.startDay)) return;
+    if (dragRef.current.mode.includes('resize')) {
+      const clampedStart = Math.max(startMinutes, Math.min(minutes, dragRef.current.eventEnd - SLOT_INTERVAL));
+      const clampedEnd = Math.max(dragRef.current.eventStart + SLOT_INTERVAL, Math.min(minutes, endMinutes));
 
-    setSelectedSlots((prev) => ({
-      ...prev,
-      endSlot: { date, minutes },
-    }));
+      if (dragRef.current.mode === 'resize-top') {
+        setEventDragPreview((prev) => ({
+          ...prev,
+          start: clampedStart,
+          end: dragRef.current.eventEnd,
+        }));
+      }
+      if (dragRef.current.mode === 'resize-bot') {
+        setEventDragPreview((prev) => ({
+          ...prev,
+          start: dragRef.current.eventStart,
+          end: clampedEnd,
+        }));
+      }
+    }
+
+    if (dragRef.current.mode === 'create') {
+      if (!isSameDay(date, dragRef.current.startDay)) return;
+
+      setSelectedSlots((prev) => ({
+        ...prev,
+        endSlot: { date, minutes },
+      }));
+    }
   }
 
   function handleDragEnd(e, date) {
     if (e.pointerId !== dragRef.current.pointerId) return;
-    if (dragRef.current.mode === 'move') {
-      const minutes = pointerToMinutes(e);
-      e.currentTarget.releasePointerCapture(dragRef.current.pointerId);
+    e.currentTarget.releasePointerCapture(dragRef.current.pointerId);
+    const minutes = pointerToMinutes(e);
 
+    if (dragRef.current.mode === 'move') {
       setEvents((prev) =>
         prev.map((ev) =>
-          ev.id === dragRef.current.eventId && dragRef.current.eventStart === minutes ?
+          ev.id === dragRef.current.eventId && dragRef.current.eventDidMove ?
             {
               ...ev,
-              start: dragRef.current.eventStart - dragRef.current.offset,
-              end: dragRef.current.eventEnd - dragRef.current.offset,
+              start: eventDragPreview.start,
+              end: eventDragPreview.end,
             }
           : ev,
         ),
@@ -139,23 +182,34 @@ export function useDragController({
       return;
     }
 
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    const minutes = pointerToMinutes(e);
-    setSelectedSlots((prev) => {
-      const didSelect = minutes !== prev.startSlot.minutes;
-      if (!didSelect) {
-        setSelectionCommitted(false);
-        return { startSlot: null, endSlot: null };
-      }
-      const min = Math.min(prev.startSlot.minutes, minutes);
-      const max = Math.max(prev.startSlot.minutes, minutes);
-      setSelectionCommitted(true);
+    if (dragRef.current.mode.includes('resize')) {
+      setEvents((prev) =>
+        prev.map((ev) =>
+          ev.id === dragRef.current.eventId ? { ...ev, start: eventDragPreview.start, end: eventDragPreview.end } : ev,
+        ),
+      );
+      setEventDragPreview(null);
       clearDragRef();
-      return {
-        startSlot: { date, minutes: min },
-        endSlot: { date, minutes: max },
-      };
-    });
+      return;
+    }
+
+    if (dragRef.current.mode === 'create') {
+      setSelectedSlots((prev) => {
+        const didSelect = minutes !== prev.startSlot.minutes;
+        if (!didSelect) {
+          setSelectionCommitted(false);
+          return { startSlot: null, endSlot: null };
+        }
+        const min = Math.min(prev.startSlot.minutes, minutes);
+        const max = Math.max(prev.startSlot.minutes, minutes);
+        setSelectionCommitted(true);
+        clearDragRef();
+        return {
+          startSlot: { date, minutes: min },
+          endSlot: { date, minutes: max },
+        };
+      });
+    }
   }
 
   function handleCancel(e, date) {
@@ -172,5 +226,6 @@ export function useDragController({
     handleDragMove,
     handleDragEnd,
     handleCancel,
+    handleEventResizeStart,
   };
 }
