@@ -21,6 +21,7 @@ export default function Calendar(props) {
 
   //State
 
+  const [eventDragPreview, setEventDragPreview] = React.useState({ start: null, end: null, eventId: null });
   const [selectedSlots, setSelectedSlots] = React.useState({
     startSlot: null,
     endSlot: null,
@@ -45,8 +46,10 @@ export default function Calendar(props) {
   const showSelectionDiv = Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
   const hasSelection = Boolean(selectedSlots.startSlot && selectedSlots.endSlot);
   const showEvent = hasSelection && selectionCommitted;
+  const hasDragPreview = eventDragPreview?.eventId != null;
 
-  console.log(hasSelection);
+  console.log(eventDragPreview?.eventId);
+  console.log(props.events);
 
   //functions
 
@@ -81,22 +84,29 @@ export default function Calendar(props) {
     e.stopPropagation();
     const { title, date, start, end, id } = eventInfo;
     dragRef.current.isDragging = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current.pointerId = e.pointerId;
     dragRef.current.mode = 'move';
     dragRef.current.eventId = id;
     dragRef.current.eventStart = start;
     dragRef.current.eventEnd = end;
     dragRef.current.eventDuration = end - start;
-    console.log('Handle Drag Event Slot Start fired');
+    setEventDragPreview((prev) => {
+      return { ...prev, start: [start], eventId: id };
+    });
   }
 
   function handleDragMove(e, date) {
     if (dragRef.current.mode === 'move') {
       const minutes = pointerToMinutes(e);
       if (dragRef.current.eventStart != minutes) {
-        console.log('CHANGED');
         dragRef.current.eventStart = minutes;
         dragRef.current.eventEnd = minutes + dragRef.current.eventDuration;
+        setEventDragPreview((prev) => {
+          return { ...prev, start: [minutes], end: [minutes + dragRef.current.eventDuration] };
+        });
       }
+      return;
     }
 
     if (!dragRef.current.isDragging) return;
@@ -113,6 +123,8 @@ export default function Calendar(props) {
 
   function handleDragEnd(e, date) {
     if (dragRef.current.mode === 'move') {
+      if (e.pointerId !== dragRef.current.pointerId) return;
+      e.currentTarget.releasePointerCapture(dragRef.current.pointerId);
       props.setEvents((prev) =>
         prev.map((ev) =>
           ev.id === dragRef.current.eventId ?
@@ -120,6 +132,16 @@ export default function Calendar(props) {
           : ev,
         ),
       );
+      setEventDragPreview(null);
+
+      dragRef.current.isDragging = false;
+      dragRef.current.mode = null;
+      dragRef.current.eventId = null;
+      dragRef.current.eventStart = null;
+      dragRef.current.eventEnd = null;
+      dragRef.current.eventDuration = null;
+
+      return;
     }
 
     if (e.pointerId !== dragRef.current.pointerId) return;
@@ -136,6 +158,7 @@ export default function Calendar(props) {
       const min = Math.min(prev.startSlot.minutes, minutes);
       const max = Math.max(prev.startSlot.minutes, minutes);
       setSelectionCommitted(true);
+      dragRef.current.mode = null;
       return {
         startSlot: { date, minutes: min },
         endSlot: { date, minutes: max },
@@ -196,10 +219,19 @@ export default function Calendar(props) {
             props.onEventHoverStart(event);
           }}
           onPointerLeave={props.onEventHoverExit}
-          style={{
-            top: (event.start / SLOT_INTERVAL) * SLOT_HEIGHT - (props.startMinutes / SLOT_INTERVAL) * SLOT_HEIGHT,
-            height: (event.end / SLOT_INTERVAL - event.start / SLOT_INTERVAL) * SLOT_HEIGHT,
-          }}
+          style={
+            hasDragPreview && eventDragPreview.eventId === event.id ?
+              {
+                top:
+                  (eventDragPreview.start / SLOT_INTERVAL) * SLOT_HEIGHT -
+                  (props.startMinutes / SLOT_INTERVAL) * SLOT_HEIGHT,
+                height: (eventDragPreview.end / SLOT_INTERVAL - eventDragPreview.start / SLOT_INTERVAL) * SLOT_HEIGHT,
+              }
+            : {
+                top: (event.start / SLOT_INTERVAL) * SLOT_HEIGHT - (props.startMinutes / SLOT_INTERVAL) * SLOT_HEIGHT,
+                height: (event.end / SLOT_INTERVAL - event.start / SLOT_INTERVAL) * SLOT_HEIGHT,
+              }
+          }
           key={`${event.title}-${event.start}-${event.end}`}
           className={clsx('event', { currentSelection: props.selectedEvent === event })}>
           <span className="eventTitle">{event.title}</span>

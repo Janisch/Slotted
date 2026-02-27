@@ -8,8 +8,8 @@ import AddEvent from '../components/AddEvent';
 
 function App() {
   //State
-  const [events, setEvents] = React.useState([
-    {
+  const [events, setEvents] = React.useState([]);
+  /*     {
       title: 'DnD mit den Boys',
       date: new Date(2026, 1, 18),
       start: 600,
@@ -25,7 +25,7 @@ function App() {
       isSelected: false,
       id: crypto.randomUUID(),
     },
-  ]);
+  ]); */
 
   const [selectedEvent, setSelectedEvent] = React.useState(null);
 
