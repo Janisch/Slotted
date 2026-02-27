@@ -27,6 +27,7 @@ export function useDragController({
     eventEnd: null,
     eventDuration: null,
     offset: null,
+    slotsElement: null,
   };
 
   const dragRef = React.useRef({ ...initialDragState });
@@ -36,16 +37,13 @@ export function useDragController({
   };
 
   const pointerToMinutes = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+    const el = dragRef.current.slotsElement ?? e.currentTarget;
+    const rect = el.getBoundingClientRect();
     const y = e.clientY - rect.top;
     const slotIndex = Math.floor(y / SLOT_HEIGHT);
     const minutes = startMinutes + slotIndex * SLOT_INTERVAL;
-    if (minutes > endMinutes) return endMinutes;
-    if (minutes < startMinutes) return startMinutes;
     return minutes;
   };
-
-  function checkIfEventInPlace() {}
 
   function handleSlotDragStart(e, date) {
     setSelectionCommitted(false);
@@ -74,7 +72,9 @@ export function useDragController({
     dragRef.current.eventEnd = end;
     dragRef.current.eventOriginalEnd = end;
     dragRef.current.eventDuration = end - start;
-    const offset = pointerToMinutes(e);
+    dragRef.current.slotsElement = e.target.closest('[data-slots]');
+    const grabbedMinutes = pointerToMinutes(e);
+    const offset = grabbedMinutes - start;
     dragRef.current.offset = offset;
     setEventDragPreview({ start: start, end: end, eventId: id });
   }
@@ -90,7 +90,6 @@ export function useDragController({
     dragRef.current.eventStart = start;
     dragRef.current.eventEnd = end;
     setEventDragPreview({ start: start, end: end, eventId: id });
-    console.log(resizeType + ' start');
   }
 
   function handleDragMove(e, date) {
@@ -109,15 +108,12 @@ export function useDragController({
       const clampedStart = Math.max(startMinutes, Math.min(desiredStart, endMinutes - duration));
       const clampedEnd = clampedStart + duration;
 
-      if (
-        dragRef.current.eventStart === clampedStart + dragRef.current.offset &&
-        dragRef.current.eventEnd === clampedEnd + dragRef.current.offset
-      ) {
+      if (dragRef.current.eventStart === clampedStart && dragRef.current.eventEnd === clampedEnd) {
         return;
       }
 
-      dragRef.current.eventStart = clampedStart + dragRef.current.offset;
-      dragRef.current.eventEnd = clampedEnd + dragRef.current.offset;
+      dragRef.current.eventStart = clampedStart;
+      dragRef.current.eventEnd = clampedEnd;
 
       dragRef.current.eventDidMove = true;
 

@@ -144,6 +144,7 @@ export default function Calendar(props) {
           <h3>{`${DAYS[date.getDay()]} ${date.getDate()}. ${MONTHS[date.getMonth()]} `}</h3>
           <div
             className="slots"
+            data-slots
             onPointerCancel={(e) => handleCancel(e, date)}
             onPointerMove={(e) => handleDragMove(e, date)}
             onPointerDown={(e) => {
