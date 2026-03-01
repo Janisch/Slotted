@@ -15,27 +15,19 @@ export default function SelectTimeFrame(props) {
     <div className="timeFrameContainer">
       <motion.div
         className="selectTimeFrame"
-        initial={{ opacity: 0, y: 8, fontSize: '1rem ' }}
-        animate={{ opacity: 1, y: 0, fontSize: '1rem ' }}
+        initial={{ clipPath: 'inset(0 100% 0 0)' }}
+        animate={{ clipPath: 'inset(0 0% 0 0)' }}
         transition={{ delay: 0.5, duration: 0.5, ease: 'easeOut' }}>
         <h1>
-          Wann soll{' '}
+          Wann soll ge
           <motion.span
             className="highlight"
-            style={{
-              overflow: 'hidden',
-            }}
-            initial={{ clipPath: 'inset(0 100% 0 0)' }}
-            animate={{ clipPath: 'inset(0 0% 0 0)' }}
-            transition={{ delay: 1, duration: 0.4, ease: 'easeOut' }}>
-            geslotted
+            initial={{ color: '#ff9a00', clipPath: 'inset(0 0 0 0)' }}
+            animate={{ color: '#FFFFFF', backgroundColor: '#ff9a00' }}
+            transition={{ delay: 1.5, duration: 0.5, ease: 'easeOut' }}>
+            slotted
           </motion.span>{' '}
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.7, duration: 0.5, ease: 'easeOut' }}>
-            werden?
-          </motion.span>
+          <motion.span>werden?</motion.span>
         </h1>
         <motion.form
           onChange={updateState}

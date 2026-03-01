@@ -298,39 +298,48 @@ main {
 }
 
 .timeFrameContainer {
+  box-sizing: border-box;
   margin: 0;
-  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   padding-bottom: 10rem;
+  height: 100%;
 }
 
 .selectTimeFrame {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 10rem;
+  margin-bottom: 5rem;
 }
 
-.selectTimeFrame > form {
+.selectTimeFrame > h1 {
   background-color: var(--color-bg-surface);
-  padding: 2rem 3rem;
+  font-weight: 500;
+  padding: 1rem 2rem;
   border-radius: 1rem;
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
 .dateForm {
+  display: flex;
+  background-color: var(--color-bg-surface);
+  padding: 2rem 3rem;
+  border-radius: 1rem;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
 }
 
 .highlight {
-  padding: 5px 10px;
+  /* padding-right: 5px;
+  padding-block: 8px;
   font-weight: 700;
   border-radius: 5px;
-  color: #ff9a00;
-  background-color: white;
+  color: white;
+
+  background-color: #ff9a00; */
 }
 
 .eventList {

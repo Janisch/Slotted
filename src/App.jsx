@@ -29,18 +29,18 @@ function App() {
 
   const [selectedEvent, setSelectedEvent] = React.useState(null);
 
-  /*  const [timeFrame, setTimeFrame] = React.useState({
+  const [timeFrame, setTimeFrame] = React.useState({
     startDate: null,
     endDate: null,
     startMinutes: 360,
     endMinutes: 1020,
-  }); */
-  const [timeFrame, setTimeFrame] = React.useState({
+  });
+  /*  const [timeFrame, setTimeFrame] = React.useState({
     startDate: new Date(2026, 1, 24),
     endDate: new Date(2026, 2, 2),
     startMinutes: 300,
     endMinutes: 1020,
-  });
+  }); */
 
   //Derived Variables
   const timeFrameIsEmpty = !Boolean(timeFrame.startDate && timeFrame.endDate);
