@@ -49,6 +49,7 @@ main {
 
 button {
   font-family: 'Satoshi';
+  transition: background-color 0.1s ease-in;
 }
 
 input {
@@ -57,6 +58,9 @@ input {
   border-radius: 0.25rem;
   padding: 3px;
   border: none;
+  transition:
+    background-color 0.1s ease-in,
+    color 0.1s;
 }
 
 input::placeholder {
@@ -351,10 +355,10 @@ input:hover {
 }
 
 .eventControlContainer {
-  min-width: 500px;
+  min-width: 450px;
+  width: 50%;
   box-sizing: border-box;
-  width: 30rem;
-  max-width: 100%;
+  width: 20rem;
   background-color: var(--color-bg-surface);
   padding: 1rem;
   border-radius: 1rem;
@@ -380,19 +384,18 @@ input:hover {
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
-  flex-wrap: wrap;
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+
   align-items: center;
-  gap: 0.5rem;
-  flex-direction: row;
+  gap: 0.5rem 0rem;
   border-radius: 8px;
   position: relative;
   padding: 1rem 0.5rem;
 }
 
-.eventControlContainer > .addEvent > * {
-  flex-grow: 1;
+.eventControlContainer > .addEvent > button {
+  grid-column: 1 / -1;
 }
 
 .eventListElement {
@@ -408,7 +411,7 @@ input:hover {
   width: 100%;
   margin-block: 0.2rem;
   padding: 4px 16px;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   border: none;
   border: 1px var(--color-secondary-accent) solid;
 }
@@ -419,11 +422,11 @@ input:hover {
 }
 
 .eventListElement > button.deleteEvent {
-  background-color: rgba(255, 0, 0, 0.514);
-  border-radius: 8px;
+  background-color: var(--color-bg-surface);
+  border: 1px rgba(255, 0, 0, 0.514) solid;
+  border-radius: 0.5rem;
   height: 2rem;
   width: 10%;
-  border: none;
 }
 
 .dayEvents {
