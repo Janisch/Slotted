@@ -12,7 +12,7 @@ export default function DateSelection(props) {
   return (
     <h2>
       <input type="date" name="startDate" value={formatDate(props.startDate)} onChange={updateState} />
-      <span>One Shot Wochenende</span>
+      <span></span>
       <input type="date" name="endDate" value={formatDate(props.endDate)} onChange={updateState} />
     </h2>
   );
