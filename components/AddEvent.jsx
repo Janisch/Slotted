@@ -1,6 +1,7 @@
 import { formatDate, timeToMinutes, minutesToTimeString } from '../timeUtils';
 import { getRandomPlaceholder } from '../placeholder';
 import React from 'react';
+import { useId } from 'react';
 
 export default function AddEvent(props) {
   const [randomPlaceholder, setRandomPlaceholder] = React.useState(() => getRandomPlaceholder());
@@ -66,9 +67,14 @@ export default function AddEvent(props) {
     });
   }
 
+  const titleInputId = useId();
+  const dateInputId = useId();
+  const startInputId = useId();
+  const endInputId = useId();
+
   return (
     <form className="addEvent" onSubmit={addEvent} style={props.floatingStyle} ref={props.floatingRef}>
-      <label htmlFor="title">Titel</label>
+      <label htmlFor={titleInputId}>Titel</label>
       <input
         type="text"
         onChange={handleChange}
@@ -76,10 +82,10 @@ export default function AddEvent(props) {
         value={eventForm.title}
         autoFocus
         name="title"
-        id="title"
+        id={titleInputId}
         required
       />
-      <label htmlFor="date">Datum</label>
+      <label htmlFor={dateInputId}>Datum</label>
       <input
         type="date"
         onChange={handleChange}
@@ -88,9 +94,9 @@ export default function AddEvent(props) {
         min={props.startDate ? formatDate(props.startDate) : ''}
         max={props.endDate ? formatDate(props.endDate) : ''}
         name="date"
-        id="date"
+        id={dateInputId}
       />
-      <label htmlFor="start">Beginn</label>
+      <label htmlFor={startInputId}>Beginn</label>
       <input
         onChange={handleChange}
         required
@@ -98,8 +104,8 @@ export default function AddEvent(props) {
         name="start"
         value={minutesToTimeString(eventForm.start)}
         step={900}
-        id="start"></input>
-      <label htmlFor="end">Ende</label>
+        id={startInputId}></input>
+      <label htmlFor={endInputId}>Ende</label>
       <input
         onChange={handleChange}
         required
@@ -107,7 +113,7 @@ export default function AddEvent(props) {
         name="end"
         value={minutesToTimeString(eventForm.end)}
         step={900}
-        id="end"></input>
+        id={endInputId}></input>
       <button type="submit">Hinzufügen</button>
     </form>
   );
