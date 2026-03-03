@@ -25,8 +25,8 @@
   --color-bg-surface: #eaefef;
   --color-border-dark: rgb(55, 56, 114);
 
-  --color-text-muted: rgba(201, 203, 211, 0.37);
   --color-text-primary: rgb(109, 110, 112);
+  --color-text-muted: rgba(201, 203, 211, 0.37);
 }
 
 body {
@@ -34,6 +34,17 @@ body {
   background-color: var(--color-bg-app);
   color: var(--color-primary);
   font-family: 'Satoshi';
+
+  --dot-color: rgb(190, 190, 190);
+  --dot-size: 2px;
+  --dot-space: 1rem;
+  background:
+    radial-gradient(transparent 50%, var(--color-bg-app)),
+    linear-gradient(90deg, var(--color-bg-app) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center /
+      var(--dot-space) var(--dot-space),
+    linear-gradient(var(--color-bg-app) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center /
+      var(--dot-space) var(--dot-space),
+    var(--dot-color);
 }
 
 main {
@@ -41,7 +52,6 @@ main {
   box-sizing: border-box;
   padding: 2rem;
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
   align-items: flex-start;
   gap: 3rem;
@@ -57,7 +67,8 @@ input {
   color: var(--color-text-primary);
   border-radius: 0.25rem;
   padding: 3px;
-  border: none;
+  border: 1px solid transparent;
+  outline: none;
   transition:
     background-color 0.1s ease-in,
     color 0.1s;
@@ -67,6 +78,10 @@ input::placeholder {
   color: var(--color-text-muted);
 }
 
+input:focus-visible {
+  border-color: var(--color-primary-accent);
+}
+
 input:hover {
   background-color: var(--color-secondary-accent);
   color: white;
@@ -74,15 +89,15 @@ input:hover {
 }
 
 .calendar {
-  box-sizing: border-box;
   max-height: calc(100dvh - 4rem);
-  overflow-y: auto;
+  min-width: 300px;
+  overflow-x: auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   background-color: var(--color-bg-surface);
   padding: 0px 20px;
-  padding-bottom: 20px;
+  padding-bottom: 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
 }
@@ -96,7 +111,7 @@ input:hover {
   margin: 0;
   font-weight: 300;
   font-size: 1.5rem;
-  padding-block: 0.5rem;
+  padding-block: 0rem;
 }
 
 .calendar > h2 > input {
@@ -111,21 +126,17 @@ input:hover {
   color: #eaefef;
 }
 
-.dates,
-.slots,
-.dateForm,
-.selectTimeFrame {
-  display: flex;
-}
-
 .dates {
-  justify-content: center;
+  min-width: 100%;
+  width: max-content;
+  display: flex;
+  justify-content: flex-start;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
 }
 
 .slots {
+  display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
@@ -233,11 +244,12 @@ input:hover {
 
 .event:hover {
   cursor: grab;
+  border-color: var(--color-primary-accent);
 }
 
 .event.currentSelection {
   background-color: #ff9a00;
-  color: black;
+  border-color: #ff5d00;
 }
 
 .topHandle,
@@ -291,7 +303,7 @@ input:hover {
   border: 1px var(--color-secondary-accent) solid;
   margin-top: 0.5rem;
   background-color: var(--color-bg-surface);
-  color: black;
+  color: var(--color-text-primary);
   padding: 0.5rem;
   border-radius: 8px;
 }
@@ -303,8 +315,7 @@ input:hover {
 .addEvent > button:hover {
   background-color: var(--color-primary);
   color: white;
-  font-weight: bold;
-  border-color: #ff5d00;
+  border-color: var(--color-primary-accent);
 }
 
 .timeFrameContainer {
@@ -315,6 +326,7 @@ input:hover {
   align-items: center;
   padding-bottom: 10rem;
   height: 100%;
+  width: 500px;
 }
 
 .selectTimeFrame {
@@ -322,22 +334,28 @@ input:hover {
   flex-direction: column;
   align-items: center;
   margin-bottom: 5rem;
+  width: 100%;
 }
 
 .selectTimeFrame > h1 {
+  text-align: center;
   background-color: var(--color-bg-surface);
   font-weight: 500;
-  padding: 1rem 2rem;
-  border-radius: 1rem;
+  padding-block: 1rem;
+  border-radius: 0.5rem;
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
+  width: 100%;
 }
 
 .dateForm {
+  width: 75%;
   display: flex;
-  background-color: var(--color-bg-surface);
-  padding: 2rem 3rem;
-  border-radius: 1rem;
   flex-direction: column;
+  background-color: var(--color-bg-surface);
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15);
+  padding-block: 1rem;
+  border-radius: 1rem;
+  margin-top: 1rem;
   align-items: center;
   gap: 1rem;
 }
@@ -421,12 +439,23 @@ input:hover {
   margin-left: 0.1rem;
 }
 
-.eventListElement > button.deleteEvent {
+.eventListElementContent > input:focus-visible,
+.eventListElementContent > span > input:focus-visible {
+  border-color: var(--color-secondary-accent);
+}
+
+.deleteEvent {
+  color: var(--color-text-primary);
   background-color: var(--color-bg-surface);
   border: 1px rgba(255, 0, 0, 0.514) solid;
   border-radius: 0.5rem;
   height: 2rem;
   width: 10%;
+}
+
+.deleteEvent:hover {
+  background-color: rgba(255, 0, 0, 0.514);
+  color: white;
 }
 
 .dayEvents {

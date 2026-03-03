@@ -9,31 +9,14 @@ import AddEvent from '../components/AddEvent';
 function App() {
   //State
   const [events, setEvents] = React.useState([]);
-  /*     {
-      title: 'DnD mit den Boys',
-      date: new Date(2026, 1, 18),
-      start: 600,
-      end: 690,
-      isSelected: false,
-      id: crypto.randomUUID(),
-    },
-    {
-      title: 'Call of Cthulhu',
-      date: new Date(2026, 1, 19),
-      start: 720,
-      end: 790,
-      isSelected: false,
-      id: crypto.randomUUID(),
-    },
-  ]); */
 
   const [selectedEvent, setSelectedEvent] = React.useState(null);
 
   const [timeFrame, setTimeFrame] = React.useState({
     startDate: null,
     endDate: null,
-    startMinutes: 360,
-    endMinutes: 1020,
+    startMinutes: 0,
+    endMinutes: 1440,
   });
   /*  const [timeFrame, setTimeFrame] = React.useState({
     startDate: new Date(2026, 1, 24),
