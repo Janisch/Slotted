@@ -70,5 +70,9 @@ export default function EventList(props) {
     });
   }
 
-  return <div className="eventList">{createEventElements()}</div>;
+  return (
+    <div className="eventListWrapper">
+      <div className="eventList">{createEventElements()}</div>
+    </div>
+  );
 }

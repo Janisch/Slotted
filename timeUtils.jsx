@@ -25,8 +25,6 @@ export function minutesAreInTimeFrame(minutesStart, minutesEnd, rangeStart, rang
   return isInRange;
 }
 
-export function roundTime(minutes, slotInterval = 30) {}
-
 export function timeToMinutes(timeString) {
   const [hours, minutes] = timeString.split(':').map(Number);
   const totalMinutes = hours * 60 + minutes;

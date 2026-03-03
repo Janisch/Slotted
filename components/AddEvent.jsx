@@ -8,8 +8,8 @@ export default function AddEvent(props) {
   const [eventForm, setEventForm] = React.useState({
     title: '',
     date: props.day ? props.day : props.timeFrame.startDate,
-    start: props.start ? props.start : '',
-    end: props.end ? props.end : '',
+    start: props.start ? props.start : props.timeFrame.startMinutes,
+    end: props.end ? props.end : props.timeFrame.endMinutes,
   });
 
   function addEvent(e) {
@@ -27,6 +27,9 @@ export default function AddEvent(props) {
         if (startDiff !== 0) return startDiff;
         return a.end - b.end;
       });
+    });
+    setEventForm((prevEventForm) => {
+      return { ...prevEventForm, title: '' };
     });
     props.clearSelection();
   }

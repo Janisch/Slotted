@@ -17,8 +17,7 @@ import { motion } from 'motion/react';
 
 export default function Calendar(props) {
   //Statics
-  const SLOT_INTERVAL = 30;
-  const SLOTS_PER_DAY = (24 * 60) / SLOT_INTERVAL;
+  const SLOTS_PER_DAY = (24 * 60) / props.slotInterval;
 
   //State
   const [selectedSlots, setSelectedSlots] = React.useState({
@@ -37,7 +36,7 @@ export default function Calendar(props) {
     handleCancel,
   } = useDragController({
     SLOT_HEIGHT,
-    SLOT_INTERVAL,
+    SLOT_INTERVAL: props.slotInterval,
     startMinutes: props.startMinutes,
     endMinutes: props.endMinutes,
     setSelectionCommitted,
@@ -65,8 +64,8 @@ export default function Calendar(props) {
     return props.events.some(
       (e) =>
         isSameDay(e.date, date) &&
-        e.start + SLOT_INTERVAL <= minutesFromStart &&
-        minutesFromStart <= e.end - SLOT_INTERVAL,
+        e.start + props.slotInterval <= minutesFromStart &&
+        minutesFromStart <= e.end - props.slotInterval,
     );
   }
 
@@ -75,7 +74,7 @@ export default function Calendar(props) {
     const slots = Array.from({ length: SLOTS_PER_DAY }, (_, i) => i);
 
     return slots.map((slotIndex) => {
-      const minutesFromStart = slotIndex * SLOT_INTERVAL;
+      const minutesFromStart = slotIndex * props.slotInterval;
 
       if (minutesFromStart < props.startMinutes || minutesFromStart > props.endMinutes) {
         return null;
@@ -111,13 +110,17 @@ export default function Calendar(props) {
             hasDragPreview && eventDragPreview?.eventId === event.id ?
               {
                 top:
-                  (eventDragPreview.start / SLOT_INTERVAL) * SLOT_HEIGHT -
-                  (props.startMinutes / SLOT_INTERVAL) * SLOT_HEIGHT,
-                height: (eventDragPreview.end / SLOT_INTERVAL - eventDragPreview.start / SLOT_INTERVAL) * SLOT_HEIGHT,
+                  (eventDragPreview.start / props.slotInterval) * SLOT_HEIGHT -
+                  (props.startMinutes / props.slotInterval) * SLOT_HEIGHT,
+                height:
+                  (eventDragPreview.end / props.slotInterval - eventDragPreview.start / props.slotInterval) *
+                  SLOT_HEIGHT,
               }
             : {
-                top: (event.start / SLOT_INTERVAL) * SLOT_HEIGHT - (props.startMinutes / SLOT_INTERVAL) * SLOT_HEIGHT,
-                height: (event.end / SLOT_INTERVAL - event.start / SLOT_INTERVAL) * SLOT_HEIGHT,
+                top:
+                  (event.start / props.slotInterval) * SLOT_HEIGHT -
+                  (props.startMinutes / props.slotInterval) * SLOT_HEIGHT,
+                height: (event.end / props.slotInterval - event.start / props.slotInterval) * SLOT_HEIGHT,
               }
           }
           key={`${event.title}-${event.start}-${event.end}`}
@@ -163,8 +166,8 @@ export default function Calendar(props) {
                   <div
                     ref={refs.setReference}
                     style={{
-                      top: ((min - props.startMinutes) / SLOT_INTERVAL) * SLOT_HEIGHT,
-                      height: ((max - min) / SLOT_INTERVAL + 1) * SLOT_HEIGHT,
+                      top: ((min - props.startMinutes) / props.slotInterval) * SLOT_HEIGHT,
+                      height: ((max - min) / props.slotInterval + 1) * SLOT_HEIGHT,
                     }}
                     className="selection"></div>
                 );
@@ -200,12 +203,17 @@ export default function Calendar(props) {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}>
         <DateSelection
+          startMinutes={props.startMinutes}
+          endMinutes={props.endMinutes}
           startDate={props.startDate}
           endDate={props.endDate}
           timeFrame={props.timeFrame}
           setTimeFrame={props.setTimeFrame}
+          slotInterval={props.slotInterval}
         />{' '}
-        <div className="dates">{createDateElements()}</div>
+        <div className="datesWrapper">
+          <div className="dates">{createDateElements()}</div>
+        </div>
         {showEvent ?
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, ease: 'easeOut' }}>
             <AddEvent

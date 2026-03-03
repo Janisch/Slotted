@@ -3,30 +3,31 @@ import React from 'react';
 import Calendar from '../components/Calendar';
 import SelectTimeFrame from '../components/SelectTimeFrame';
 import EventList from '../components/EventList';
-import DateSelection from '../components/DateSelection';
 import AddEvent from '../components/AddEvent';
 
 function App() {
   //State
   const [events, setEvents] = React.useState([]);
-
   const [selectedEvent, setSelectedEvent] = React.useState(null);
-
+  /* 
   const [timeFrame, setTimeFrame] = React.useState({
     startDate: null,
     endDate: null,
     startMinutes: 0,
-    endMinutes: 1440,
-  });
-  /*  const [timeFrame, setTimeFrame] = React.useState({
+    endMinutes: 1410,
+  }); */
+  const [timeFrame, setTimeFrame] = React.useState({
     startDate: new Date(2026, 1, 24),
     endDate: new Date(2026, 2, 2),
-    startMinutes: 300,
-    endMinutes: 1020,
-  }); */
+    startMinutes: 0,
+    endMinutes: 1439,
+    slotInterval: 30,
+  });
 
   //Derived Variables
   const timeFrameIsEmpty = !Boolean(timeFrame.startDate && timeFrame.endDate);
+
+  //Statics
 
   function handleEventHover(event) {
     setSelectedEvent((prevSelectedEvent) => {
@@ -56,6 +57,7 @@ function App() {
             </section>
 
             <Calendar
+              slotInterval={timeFrame.slotInterval}
               timeFrame={timeFrame}
               setTimeFrame={setTimeFrame}
               startMinutes={timeFrame.startMinutes}
