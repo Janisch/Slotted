@@ -1,5 +1,8 @@
 # Slotted
 
+<img width="1891" height="906" alt="image" src="https://github.com/user-attachments/assets/d6a35dac-7d20-41c0-8029-82d0195b9f22" />
+
+
 ## What is this?
 
 **Slotted** is a lightweight time management application that allows users to organize their schedule using flexible **time slots** within a custom date range.
@@ -49,6 +52,19 @@ From there you can:
 - Delete events
 - Review scheduled time slots
 Changes are reflected immediately in the calendar.
+
+## Event Interaction
+Events inside the calendar are fully interactive and can be adjusted directly using drag and drop.
+
+### Move Events
+Events can be **dragged vertically within a day column** to change their scheduled time.  
+Simply click and drag the event to a new position within the same day.
+
+### Resize Events
+The **start and end times** of an event can also be adjusted visually.
+Each event has two draggable handles:
+- **Top handle** – adjusts the start time
+- **Bottom handle** – adjusts the end time
 
 ## Calendar Controls
 The calendar includes several controls to customize the visible schedule:
