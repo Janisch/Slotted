@@ -1,11 +1,4 @@
-import {
-  getDateString,
-  timeToMinutes,
-  formatDate,
-  isSameDay,
-  minutesToTimeString,
-  dateIsInTimeFrame,
-} from '../timeUtils';
+import { getDateString, timeToMinutes, isSameDay, minutesToTimeString } from '../timeUtils';
 import React from 'react';
 
 export default function EventList(props) {

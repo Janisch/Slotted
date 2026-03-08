@@ -9,18 +9,12 @@ function App() {
   //State
   const [events, setEvents] = React.useState([]);
   const [selectedEvent, setSelectedEvent] = React.useState(null);
-  /* 
+
   const [timeFrame, setTimeFrame] = React.useState({
     startDate: null,
     endDate: null,
     startMinutes: 0,
     endMinutes: 1410,
-  }); */
-  const [timeFrame, setTimeFrame] = React.useState({
-    startDate: new Date(2026, 1, 24),
-    endDate: new Date(2026, 2, 2),
-    startMinutes: 0,
-    endMinutes: 1439,
     slotInterval: 30,
   });
 
@@ -28,7 +22,6 @@ function App() {
   const timeFrameIsEmpty = !Boolean(timeFrame.startDate && timeFrame.endDate);
 
   //Statics
-
   function handleEventHover(event) {
     setSelectedEvent((prevSelectedEvent) => {
       return event != prevSelectedEvent ? event : prevSelectedEvent;
