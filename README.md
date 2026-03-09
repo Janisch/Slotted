@@ -24,7 +24,7 @@ Before installing, make sure you have the following installed on your system:
 ```
 npm install
 ```
-4. Start tge development server:
+4. Start the development server:
 ```
 npm run dev
 ```
